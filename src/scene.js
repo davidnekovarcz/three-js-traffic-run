@@ -4,7 +4,8 @@ import {
   WebGLRenderer,
   AmbientLight,
   DirectionalLight,
-  GridHelper
+  GridHelper,
+  HemisphereLight
 } from 'three';
 
 // Scene setup
@@ -30,23 +31,27 @@ const renderer = new WebGLRenderer({
   powerPreference: 'high-performance'
 });
 renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.shadowMap.enabled = true;
 document.body.appendChild(renderer.domElement);
 
-const ambientLight = new AmbientLight(0xffffff, 0.6);
+const ambientLight = new AmbientLight(0xffffff, 1.2); // Brighter ambient
 scene.add(ambientLight);
 
-const dirLight = new DirectionalLight(0xffffff, 0.6);
-dirLight.position.set(100, -300, 300);
+const dirLight = new DirectionalLight(0xffffff, 1.5); // Stronger sunlight
+dirLight.position.set(200, -400, 500);
 dirLight.castShadow = true;
-dirLight.shadow.mapSize.width = 1024;
-dirLight.shadow.mapSize.height = 1024;
-dirLight.shadow.camera.left = -400;
-dirLight.shadow.camera.right = 350;
-dirLight.shadow.camera.top = 400;
-dirLight.shadow.camera.bottom = -300;
+dirLight.shadow.mapSize.width = 2048;
+dirLight.shadow.mapSize.height = 2048;
+dirLight.shadow.camera.left = -500;
+dirLight.shadow.camera.right = 500;
+dirLight.shadow.camera.top = 500;
+dirLight.shadow.camera.bottom = -500;
 dirLight.shadow.camera.near = 100;
-dirLight.shadow.camera.far = 800;
+dirLight.shadow.camera.far = 1000;
 scene.add(dirLight);
+
+const hemiLight = new HemisphereLight(0xe0eaff, 0xf0e0c0, 0.3);
+scene.add(hemiLight);
 
 // Optionally export a function to add grid helper
 function addGridHelper() {

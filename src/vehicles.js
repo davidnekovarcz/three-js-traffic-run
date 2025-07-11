@@ -160,7 +160,7 @@ function Truck() {
 function Wheel() {
   const wheel = new Mesh(wheelGeometry, wheelMaterial);
   wheel.position.z = 6;
-  wheel.castShadow = false;
+  wheel.castShadow = true;
   wheel.receiveShadow = false;
   return wheel;
 }
