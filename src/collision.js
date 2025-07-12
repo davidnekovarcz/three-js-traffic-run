@@ -16,16 +16,25 @@ function getDistance(c1, c2) {
 }
 
 // Helper: Mark vehicle as crashed, change appearance, show explosion, and schedule removal
-function destroyVehicle(vehicle, scene, otherVehicles) {
+function destroyVehicle(vehicle, scene, otherVehicles, isPlayer = false) {
   vehicle.crashed = true;
-  // Play quiet crash sound for AI car-to-car collisions
   playCarCrashQuiet();
-  // Change appearance: darken and deform
+  // Change appearance: blend 70% black with original color, 30% transparent
   vehicle.mesh.traverse(child => {
     if (child.material) {
-      // Add a semi-transparent black overlay
-      child.material.color && (child.material.color.set(0x222222));
-      child.material.opacity = 0.5;
+      if (child.material.color) {
+        // Save original color if not already saved
+        child.material.userData = child.material.userData || {};
+        if (!child.material.userData.originalColor) {
+          child.material.userData.originalColor = child.material.color.clone();
+        }
+        // Blend 70% black with original color
+        const orig = child.material.userData.originalColor;
+        child.material.color.r = orig.r * 0.3;
+        child.material.color.g = orig.g * 0.3;
+        child.material.color.b = orig.b * 0.3;
+      }
+      child.material.opacity = 0.7;
       child.material.transparent = true;
     }
   });
@@ -54,16 +63,17 @@ function destroyVehicle(vehicle, scene, otherVehicles) {
     }
   };
   grow();
-  // Remove vehicle after 2s
-  setTimeout(() => {
-    scene.remove(vehicle.mesh);
-    if (vehicle.explosionMesh) {
-      scene.remove(vehicle.explosionMesh);
-      vehicle.explosionMesh = null;
-    }
-    const idx = otherVehicles.indexOf(vehicle);
-    if (idx !== -1) otherVehicles.splice(idx, 1);
-  }, 2000);
+  if (!isPlayer) {
+    setTimeout(() => {
+      scene.remove(vehicle.mesh);
+      if (vehicle.explosionMesh) {
+        scene.remove(vehicle.explosionMesh);
+        vehicle.explosionMesh = null;
+      }
+      const idx = otherVehicles.indexOf(vehicle);
+      if (idx !== -1) otherVehicles.splice(idx, 1);
+    }, 2000);
+  }
 }
 
 // Helper: Check if two vehicles are close enough to crash
@@ -100,6 +110,7 @@ export function checkCollision({
     -15
   );
   let hit = false;
+  let collidedVehicle = null;
   otherVehicles.forEach(vehicle => {
     if (vehicle.crashed) return;
     let vehicleHit = false;
@@ -122,15 +133,20 @@ export function checkCollision({
     if (vehicleHit) {
       playerCollidedVehicles.add(vehicle);
       vehicle.crashed = true; // Stop moving
-      // Optionally: destroyVehicle(vehicle, scene, otherVehicles); // If you want explosion on player crash too
+      collidedVehicle = vehicle;
       hit = true;
     }
   });
   if (hit) {
+    // Destroy both the player's car and the collided vehicle BEFORE game over
+    if (collidedVehicle) destroyVehicle(collidedVehicle, scene, otherVehicles);
+    destroyVehicle({ mesh: playerCar, crashed: false }, scene, [], true);
     playCarCrash();
     stopCarEngine();
-    showResults(true);
-    stopAnimationLoop();
+    setTimeout(() => {
+      showResults(true);
+      stopAnimationLoop();
+    }, 1000); // Delay game over by 1s for animation
     return true;
   }
   // Car-to-car collisions in the same lane (skip vehicles involved in player collision)

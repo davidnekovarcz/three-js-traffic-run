@@ -50,6 +50,7 @@ const playerAngleInitial = Math.PI;
 let paused = false;
 let pauseRequested = false;
 let gameOver = false;
+let gameOverPending = false;
 
 function pauseGame() {
   if (!paused && !gameOver) {
@@ -86,9 +87,28 @@ function reset() {
   lastTimestamp = undefined;
   // Place the player's car to the starting position
   movePlayerCar(0);
+  // --- Restore player car visuals ---
+  if (playerCar) {
+    playerCar.traverse(child => {
+      if (child.material) {
+        if (child.material.color && child.material.userData && child.material.userData.originalColor) {
+          child.material.color.copy(child.material.userData.originalColor);
+        } else if (child.material.color) {
+          // Save original color if not already saved
+          child.material.userData = child.material.userData || {};
+          child.material.userData.originalColor = child.material.color.clone();
+        }
+        child.material.opacity = 1;
+        child.material.transparent = false;
+      }
+    });
+    playerCar.scale.set(1, 1, 1);
+    playerCar.rotation.z = playerAngleInitial - Math.PI / 2;
+  }
   renderer.render(scene, camera);
   ready = true;
   gameOver = false;
+  gameOverPending = false;
 }
 
 function startGame() {
@@ -99,6 +119,7 @@ function startGame() {
     setInstructionsOpacity(0);
     setAnimationLoop(animation);
     gameOver = false;
+    gameOverPending = false;
   }
 }
 
@@ -137,6 +158,11 @@ function animation(timestamp) {
     lastTimestamp = timestamp;
     return;
   }
+  if (gameOverPending) {
+    renderer.render(scene, camera);
+    lastTimestamp = timestamp;
+    return;
+  }
   const timeDelta = timestamp - lastTimestamp;
   movePlayerCar(timeDelta);
   const laps = Math.floor(Math.abs(playerAngleMoved) / (Math.PI * 2));
@@ -157,7 +183,7 @@ function animation(timestamp) {
     scene // Pass scene for explosions
   });
   if (hit) {
-    gameOver = true;
+    gameOverPending = true;
     return;
   }
   renderer.render(scene, camera);
