@@ -9,7 +9,7 @@ import {
   CanvasTexture
 } from 'three';
 import { playCarEngine } from './audio.js';
-import { innerTrackRadius, outerTrackRadius } from './track.js';
+import { innerTrackRadius, outerTrackRadius, arcCenterX } from './track.js';
 
 // Vehicle colors and materials
 const vehicleColors = [
@@ -79,9 +79,9 @@ function getTruckSideTexture() {
 }
 
 // Car, Truck, Wheel, HitZone, Tree
-function Car() {
+function Car(availableColors = vehicleColors) {
   const car = new Group();
-  const color = pickRandom(vehicleColors);
+  const color = pickRandom(availableColors);
   const main = new Mesh(new BoxGeometry(60, 30, 15), new MeshLambertMaterial({ color }));
   main.position.z = 12;
   main.castShadow = true;
@@ -117,9 +117,9 @@ function Car() {
   car.add(frontWheel);
   return car;
 }
-function Truck() {
+function Truck(availableColors = vehicleColors) {
   const truck = new Group();
-  const color = pickRandom(vehicleColors);
+  const color = pickRandom(availableColors);
   const base = new Mesh(new BoxGeometry(100, 25, 5), new MeshLambertMaterial({ color: 0xb4c6fc }));
   base.position.z = 10;
   truck.add(base);
@@ -210,23 +210,47 @@ function getVehicleSpeed(type) {
   }
 }
 
-function addVehicle(scene, otherVehicles, Car, Truck) {
+function addVehicle(scene, otherVehicles, Car, Truck, playerCarColor) {
+  // Exclude player color from vehicleColors
+  let availableColors = vehicleColors.slice();
+  if (playerCarColor !== null) {
+    availableColors = availableColors.filter(c => c !== playerCarColor);
+  }
   const vehicleTypes = ['car', 'truck'];
   const type = vehicleTypes[Math.floor(Math.random() * vehicleTypes.length)];
   const vehicleSpeed = getVehicleSpeed(type);
   const clockwise = Math.random() >= 0.5;
-  const angle = clockwise ? Math.PI / 2 : -Math.PI / 2;
-  const mesh = type === 'car' ? Car() : Truck();
-  scene.add(mesh);
-  // Move vehicles even closer to the center of the road
   const laneOffset = 20;
   const radius = clockwise ? (innerTrackRadius + laneOffset) : (outerTrackRadius - laneOffset);
+  let angle, mesh, collision;
+  // Try up to 10 times to find a non-colliding spawn
+  for (let attempt = 0; attempt < 10; ++attempt) {
+    angle = clockwise ? Math.PI / 2 : -Math.PI / 2;
+    // Randomize angle a bit for variety
+    angle += (Math.random() - 0.5) * Math.PI * 2;
+    // Use availableColors for this car/truck
+    mesh = (type === 'car' ? Car : Truck)(availableColors);
+    // Compute spawn position
+    const x = Math.cos(angle) * radius + (clockwise ? arcCenterX : -arcCenterX);
+    const y = Math.sin(angle) * radius;
+    mesh.position.x = x;
+    mesh.position.y = y;
+    collision = otherVehicles.some(v => {
+      if (v.radius !== radius) return false;
+      const dx = v.mesh.position.x - x;
+      const dy = v.mesh.position.y - y;
+      return Math.sqrt(dx * dx + dy * dy) < 70;
+    });
+    if (!collision) break;
+  }
+  scene.add(mesh);
   otherVehicles.push({ mesh, type, speed: vehicleSpeed, clockwise, angle, radius });
   playCarEngine();
 }
 
 function moveOtherVehicles(otherVehicles, speed, timeDelta, _trackRadius, arcCenterX) {
   otherVehicles.forEach(vehicle => {
+    if (vehicle.crashed) return; // Stop moving if crashed
     if (vehicle.clockwise) {
       vehicle.angle -= speed * timeDelta * vehicle.speed;
     } else {
@@ -242,14 +266,4 @@ function moveOtherVehicles(otherVehicles, speed, timeDelta, _trackRadius, arcCen
   });
 }
 
-export {
-  Car,
-  Truck,
-  Wheel,
-  HitZone,
-  Tree,
-  pickRandom,
-  getVehicleSpeed,
-  addVehicle,
-  moveOtherVehicles
-}; 
+export { Car, Truck, Wheel, HitZone, Tree, pickRandom, getVehicleSpeed, addVehicle, moveOtherVehicles, vehicleColors }; 

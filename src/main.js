@@ -9,7 +9,7 @@ import {
   cameraHeight,
   audioListener // Import audioListener
 } from './scene.js';
-import { Car, Truck, Tree, addVehicle, moveOtherVehicles, getVehicleSpeed } from './vehicles.js';
+import { Car, Truck, Tree, addVehicle, moveOtherVehicles, getVehicleSpeed, pickRandom } from './vehicles.js';
 import {
   renderMap,
   trackRadius,
@@ -28,6 +28,7 @@ import {
   initAudio
 } from './audio.js';
 import { checkCollision } from './collision.js';
+import { vehicleColors } from './vehicles.js';
 
 // Game state
 let playerCar;
@@ -39,6 +40,7 @@ let decelerate = false;
 let ready = false;
 let lastTimestamp;
 let playerLane = 'inner'; // 'inner' or 'outer'
+let playerCarColor = null;
 const laneOffset = 20;
 
 const speed = 0.0017;
@@ -48,8 +50,16 @@ function reset() {
   playerAngleMoved = 0;
   score = 0;
   setScore('Press UP');
-  // Remove other vehicles
-  otherVehicles.forEach(vehicle => scene.remove(vehicle.mesh));
+  // Remove other vehicles and explosions
+  otherVehicles.forEach(vehicle => {
+    scene.remove(vehicle.mesh);
+    vehicle.crashed = false;
+    // Remove explosion meshes if any
+    if (vehicle.explosionMesh) {
+      scene.remove(vehicle.explosionMesh);
+      vehicle.explosionMesh = null;
+    }
+  });
   otherVehicles = [];
   showResults(false);
   lastTimestamp = undefined;
@@ -111,7 +121,7 @@ function animation(timestamp) {
     score = laps;
     setScore(score);
   }
-  if (otherVehicles.length < (laps + 1) / 5) addVehicle(scene, otherVehicles, Car, Truck);
+  if (otherVehicles.length < (laps + 1) / 5) addVehicle(scene, otherVehicles, Car, Truck, playerCarColor);
   moveOtherVehicles(otherVehicles, speed, timeDelta, trackRadius, arcCenterX);
   checkCollision({
     playerCar,
@@ -119,7 +129,8 @@ function animation(timestamp) {
     playerAngleMoved,
     otherVehicles,
     showResults,
-    stopAnimationLoop
+    stopAnimationLoop,
+    scene // Pass scene for explosions
   });
   renderer.render(scene, camera);
   lastTimestamp = timestamp;
@@ -162,7 +173,9 @@ window.addEventListener('resize', () => {
 
 // Game initialization
 function init() {
-  playerCar = Car();
+  // Pick a random color for the player
+  playerCarColor = pickRandom(vehicleColors);
+  playerCar = Car([playerCarColor]);
   scene.add(playerCar);
   renderMap(scene, cameraWidth, cameraHeight * 2, { curbs: true, trees: true }, positionScoreElement, Tree);
   reset();
