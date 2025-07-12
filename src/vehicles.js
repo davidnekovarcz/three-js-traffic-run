@@ -9,6 +9,7 @@ import {
   CanvasTexture
 } from 'three';
 import { playCarEngine } from './audio.js';
+import { innerTrackRadius, outerTrackRadius } from './track.js';
 
 // Vehicle colors and materials
 const vehicleColors = [
@@ -217,19 +218,23 @@ function addVehicle(scene, otherVehicles, Car, Truck) {
   const angle = clockwise ? Math.PI / 2 : -Math.PI / 2;
   const mesh = type === 'car' ? Car() : Truck();
   scene.add(mesh);
-  otherVehicles.push({ mesh, type, speed: vehicleSpeed, clockwise, angle });
+  // Move vehicles even closer to the center of the road
+  const laneOffset = 20;
+  const radius = clockwise ? (innerTrackRadius + laneOffset) : (outerTrackRadius - laneOffset);
+  otherVehicles.push({ mesh, type, speed: vehicleSpeed, clockwise, angle, radius });
   playCarEngine();
 }
 
-function moveOtherVehicles(otherVehicles, speed, timeDelta, trackRadius, arcCenterX) {
+function moveOtherVehicles(otherVehicles, speed, timeDelta, _trackRadius, arcCenterX) {
   otherVehicles.forEach(vehicle => {
     if (vehicle.clockwise) {
       vehicle.angle -= speed * timeDelta * vehicle.speed;
     } else {
       vehicle.angle += speed * timeDelta * vehicle.speed;
     }
-    const vehicleX = Math.cos(vehicle.angle) * trackRadius + arcCenterX;
-    const vehicleY = Math.sin(vehicle.angle) * trackRadius;
+    // Use each vehicle's assigned radius
+    const vehicleX = Math.cos(vehicle.angle) * vehicle.radius + arcCenterX;
+    const vehicleY = Math.sin(vehicle.angle) * vehicle.radius;
     const rotation = vehicle.angle + (vehicle.clockwise ? -Math.PI / 2 : Math.PI / 2);
     vehicle.mesh.position.x = vehicleX;
     vehicle.mesh.position.y = vehicleY;

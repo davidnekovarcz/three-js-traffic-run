@@ -13,7 +13,9 @@ import { Car, Truck, Tree, addVehicle, moveOtherVehicles, getVehicleSpeed } from
 import {
   renderMap,
   trackRadius,
-  arcCenterX
+  arcCenterX,
+  innerTrackRadius,
+  outerTrackRadius
 } from './track.js';
 import {
   setScore,
@@ -23,10 +25,7 @@ import {
   setupUIHandlers
 } from './ui.js';
 import {
-  initAudio,
-  playCarEngine,
-  stopCarEngine,
-  playCarCrash
+  initAudio
 } from './audio.js';
 import { checkCollision } from './collision.js';
 
@@ -39,6 +38,8 @@ let accelerate = false;
 let decelerate = false;
 let ready = false;
 let lastTimestamp;
+let playerLane = 'inner'; // 'inner' or 'outer'
+const laneOffset = 20;
 
 const speed = 0.0017;
 const playerAngleInitial = Math.PI;
@@ -68,12 +69,17 @@ function startGame() {
   }
 }
 
+function getPlayerLaneRadius() {
+  return playerLane === 'inner' ? (innerTrackRadius + laneOffset) : (outerTrackRadius - laneOffset);
+}
+
 function movePlayerCar(timeDelta) {
   const playerSpeed = getPlayerSpeed();
   playerAngleMoved -= playerSpeed * timeDelta;
   const totalPlayerAngle = playerAngleInitial + playerAngleMoved;
-  const playerX = Math.cos(totalPlayerAngle) * trackRadius - arcCenterX;
-  const playerY = Math.sin(totalPlayerAngle) * trackRadius;
+  const playerRadius = getPlayerLaneRadius();
+  const playerX = Math.cos(totalPlayerAngle) * playerRadius - arcCenterX;
+  const playerY = Math.sin(totalPlayerAngle) * playerRadius;
   playerCar.position.x = playerX;
   playerCar.position.y = playerY;
   playerCar.rotation.z = totalPlayerAngle - Math.PI / 2;
@@ -83,6 +89,14 @@ function getPlayerSpeed() {
   if (accelerate) return speed * 2;
   if (decelerate) return speed * 0.5;
   return speed;
+}
+
+function switchLane(direction) {
+  if (direction === 'left') {
+    playerLane = 'outer';
+  } else if (direction === 'right') {
+    playerLane = 'inner';
+  }
 }
 
 function animation(timestamp) {
@@ -126,7 +140,9 @@ setupUIHandlers({
   onAccelerateDown: (val) => { accelerate = val; },
   onDecelerateDown: (val) => { decelerate = val; },
   onResetKey: reset,
-  onStartKey: startGame
+  onStartKey: startGame,
+  onLeftKey: () => { playerLane = 'outer'; },
+  onRightKey: () => { playerLane = 'inner'; }
 });
 
 // Initialize audio
@@ -153,3 +169,8 @@ function init() {
 }
 
 init();
+
+window.addEventListener('keydown', (event) => {
+  if (event.key === 'ArrowLeft') switchLane('left');
+  if (event.key === 'ArrowRight') switchLane('right');
+});
