@@ -240,7 +240,11 @@ init();
 window.addEventListener('keydown', (event) => {
   if (event.key === ' ') {
     event.preventDefault();
-    pauseGame();
+    if (paused) {
+      resumeGame();
+    } else {
+      pauseGame();
+    }
   }
   if (event.key === 'ArrowLeft') switchLane('left');
   if (event.key === 'ArrowRight') switchLane('right');
