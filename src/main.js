@@ -191,6 +191,8 @@ function hitDetection() {
     // Play crash sound
     if (carCrashSound.isPlaying) carCrashSound.stop();
     carCrashSound.play();
+    // Stop car engine sound
+    if (carStartSound.isPlaying) carStartSound.stop();
     showResults(true);
     stopAnimationLoop();
   }
