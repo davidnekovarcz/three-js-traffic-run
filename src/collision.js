@@ -1,4 +1,4 @@
-import { playCarCrash, stopCarEngine } from './audio.js';
+import { playCarCrash, stopCarEngine, playCarCrashQuiet } from './audio.js';
 import * as THREE from 'three';
 
 function getHitZonePosition(center, angle, clockwise, distance) {
@@ -18,6 +18,8 @@ function getDistance(c1, c2) {
 // Helper: Mark vehicle as crashed, change appearance, show explosion, and schedule removal
 function destroyVehicle(vehicle, scene, otherVehicles) {
   vehicle.crashed = true;
+  // Play quiet crash sound for AI car-to-car collisions
+  playCarCrashQuiet();
   // Change appearance: darken and deform
   vehicle.mesh.traverse(child => {
     if (child.material) {

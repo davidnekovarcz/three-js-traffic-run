@@ -1,6 +1,7 @@
 import { Audio, AudioLoader } from 'three';
 
 let carEngineSound, carCrashSound;
+let carCrashDefaultVolume = 0.7;
 
 export function initAudio(audioListener) {
   const audioLoader = new AudioLoader();
@@ -14,7 +15,7 @@ export function initAudio(audioListener) {
   });
   audioLoader.load('src/audio/car-crash.wav', buffer => {
     carCrashSound.setBuffer(buffer);
-    carCrashSound.setVolume(0.7);
+    carCrashSound.setVolume(carCrashDefaultVolume);
   });
 }
 
@@ -32,7 +33,19 @@ export function stopCarEngine() {
 export function playCarCrash() {
   if (carCrashSound && carCrashSound.buffer) {
     if (carCrashSound.isPlaying) carCrashSound.stop();
+    carCrashSound.setVolume(carCrashDefaultVolume);
     carCrashSound.play();
+  }
+}
+
+export function playCarCrashQuiet() {
+  if (carCrashSound && carCrashSound.buffer) {
+    if (carCrashSound.isPlaying) carCrashSound.stop();
+    carCrashSound.setVolume(0.25);
+    carCrashSound.play();
+    setTimeout(() => {
+      carCrashSound.setVolume(carCrashDefaultVolume);
+    }, 300); // restore after short time
   }
 }
 

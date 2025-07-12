@@ -5,6 +5,7 @@ const instructionsElement = document.getElementById("instructions");
 const resultsElement = document.getElementById("results");
 const accelerateButton = document.getElementById("accelerate");
 const decelerateButton = document.getElementById("decelerate");
+const pauseDialogElement = document.getElementById('pause-dialog');
 
 // Create arrow buttons
 const upButton = document.createElement('button');
@@ -78,6 +79,12 @@ function setInstructionsOpacity(opacity) {
 function setButtonsOpacity(opacity) {
   if (buttonsElement) buttonsElement.style.opacity = opacity;
 }
+function showPauseDialog() {
+  if (pauseDialogElement) pauseDialogElement.style.display = 'flex';
+}
+function hidePauseDialog() {
+  if (pauseDialogElement) pauseDialogElement.style.display = 'none';
+}
 function setupUIHandlers({ onAccelerateDown, onAccelerateUp, onDecelerateDown, onDecelerateUp, onResetKey, onStartKey, onLeftKey, onRightKey }) {
   onAccelerate = onAccelerateDown;
   onDecelerate = onDecelerateDown;
@@ -125,5 +132,7 @@ export {
   scoreElement,
   buttonsElement,
   instructionsElement,
-  resultsElement
+  resultsElement,
+  showPauseDialog,
+  hidePauseDialog
 }; 

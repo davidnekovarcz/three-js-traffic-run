@@ -22,7 +22,9 @@ import {
   showResults,
   setInstructionsOpacity,
   setButtonsOpacity,
-  setupUIHandlers
+  setupUIHandlers,
+  showPauseDialog,
+  hidePauseDialog
 } from './ui.js';
 import {
   initAudio
@@ -45,6 +47,25 @@ const laneOffset = 20;
 
 const speed = 0.0017;
 const playerAngleInitial = Math.PI;
+let paused = false;
+let pauseRequested = false;
+let gameOver = false;
+
+function pauseGame() {
+  if (!paused && !gameOver) {
+    stopAnimationLoop();
+    showPauseDialog();
+    paused = true;
+  }
+}
+function resumeGame() {
+  if (paused && !gameOver) {
+    hidePauseDialog();
+    lastTimestamp = undefined;
+    setAnimationLoop(animation);
+    paused = false;
+  }
+}
 
 function reset() {
   playerAngleMoved = 0;
@@ -67,6 +88,7 @@ function reset() {
   movePlayerCar(0);
   renderer.render(scene, camera);
   ready = true;
+  gameOver = false;
 }
 
 function startGame() {
@@ -76,6 +98,7 @@ function startGame() {
     setButtonsOpacity(1);
     setInstructionsOpacity(0);
     setAnimationLoop(animation);
+    gameOver = false;
   }
 }
 
@@ -123,7 +146,7 @@ function animation(timestamp) {
   }
   if (otherVehicles.length < (laps + 1) / 5) addVehicle(scene, otherVehicles, Car, Truck, playerCarColor);
   moveOtherVehicles(otherVehicles, speed, timeDelta, trackRadius, arcCenterX);
-  checkCollision({
+  const hit = checkCollision({
     playerCar,
     playerAngleInitial,
     playerAngleMoved,
@@ -132,6 +155,10 @@ function animation(timestamp) {
     stopAnimationLoop,
     scene // Pass scene for explosions
   });
+  if (hit) {
+    gameOver = true;
+    return;
+  }
   renderer.render(scene, camera);
   lastTimestamp = timestamp;
 }
@@ -148,12 +175,12 @@ function positionScoreElement() {
 
 // UI event wiring
 setupUIHandlers({
-  onAccelerateDown: (val) => { accelerate = val; },
-  onDecelerateDown: (val) => { decelerate = val; },
+  onAccelerateDown: (val) => { if (!paused) accelerate = val; },
+  onDecelerateDown: (val) => { if (!paused) decelerate = val; },
   onResetKey: reset,
-  onStartKey: startGame,
-  onLeftKey: () => { playerLane = 'outer'; },
-  onRightKey: () => { playerLane = 'inner'; }
+  onStartKey: () => { if (paused) resumeGame(); else startGame(); },
+  onLeftKey: () => { if (!paused) playerLane = 'outer'; },
+  onRightKey: () => { if (!paused) playerLane = 'inner'; }
 });
 
 // Initialize audio
@@ -184,6 +211,10 @@ function init() {
 init();
 
 window.addEventListener('keydown', (event) => {
+  if (event.key === ' ') {
+    event.preventDefault();
+    pauseGame();
+  }
   if (event.key === 'ArrowLeft') switchLane('left');
   if (event.key === 'ArrowRight') switchLane('right');
 });
