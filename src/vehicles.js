@@ -8,6 +8,7 @@ import {
   Vector2,
   CanvasTexture
 } from 'three';
+import { playCarEngine } from './audio.js';
 
 // Vehicle colors and materials
 const vehicleColors = [
@@ -195,11 +196,55 @@ function Tree() {
 }
 
 // Vehicle management (to be wired up by main)
+function getVehicleSpeed(type) {
+  if (type === 'car') {
+    const minimumSpeed = 1;
+    const maximumSpeed = 2;
+    return minimumSpeed + Math.random() * (maximumSpeed - minimumSpeed);
+  }
+  if (type === 'truck') {
+    const minimumSpeed = 0.6;
+    const maximumSpeed = 1.5;
+    return minimumSpeed + Math.random() * (maximumSpeed - minimumSpeed);
+  }
+}
+
+function addVehicle(scene, otherVehicles, Car, Truck) {
+  const vehicleTypes = ['car', 'truck'];
+  const type = vehicleTypes[Math.floor(Math.random() * vehicleTypes.length)];
+  const vehicleSpeed = getVehicleSpeed(type);
+  const clockwise = Math.random() >= 0.5;
+  const angle = clockwise ? Math.PI / 2 : -Math.PI / 2;
+  const mesh = type === 'car' ? Car() : Truck();
+  scene.add(mesh);
+  otherVehicles.push({ mesh, type, speed: vehicleSpeed, clockwise, angle });
+  playCarEngine();
+}
+
+function moveOtherVehicles(otherVehicles, speed, timeDelta, trackRadius, arcCenterX) {
+  otherVehicles.forEach(vehicle => {
+    if (vehicle.clockwise) {
+      vehicle.angle -= speed * timeDelta * vehicle.speed;
+    } else {
+      vehicle.angle += speed * timeDelta * vehicle.speed;
+    }
+    const vehicleX = Math.cos(vehicle.angle) * trackRadius + arcCenterX;
+    const vehicleY = Math.sin(vehicle.angle) * trackRadius;
+    const rotation = vehicle.angle + (vehicle.clockwise ? -Math.PI / 2 : Math.PI / 2);
+    vehicle.mesh.position.x = vehicleX;
+    vehicle.mesh.position.y = vehicleY;
+    vehicle.mesh.rotation.z = rotation;
+  });
+}
+
 export {
   Car,
   Truck,
   Wheel,
   HitZone,
   Tree,
-  pickRandom
+  pickRandom,
+  getVehicleSpeed,
+  addVehicle,
+  moveOtherVehicles
 }; 

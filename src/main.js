@@ -9,7 +9,7 @@ import {
   cameraHeight,
   audioListener // Import audioListener
 } from './scene.js';
-import { Car, Truck, Tree } from './vehicles.js';
+import { Car, Truck, Tree, addVehicle, moveOtherVehicles, getVehicleSpeed } from './vehicles.js';
 import {
   renderMap,
   trackRadius,
@@ -22,7 +22,13 @@ import {
   setButtonsOpacity,
   setupUIHandlers
 } from './ui.js';
-import { Audio, AudioLoader } from 'three';
+import {
+  initAudio,
+  playCarEngine,
+  stopCarEngine,
+  playCarCrash
+} from './audio.js';
+import { checkCollision } from './collision.js';
 
 // Game state
 let playerCar;
@@ -73,53 +79,10 @@ function movePlayerCar(timeDelta) {
   playerCar.rotation.z = totalPlayerAngle - Math.PI / 2;
 }
 
-function moveOtherVehicles(timeDelta) {
-  otherVehicles.forEach(vehicle => {
-    if (vehicle.clockwise) {
-      vehicle.angle -= speed * timeDelta * vehicle.speed;
-    } else {
-      vehicle.angle += speed * timeDelta * vehicle.speed;
-    }
-    const vehicleX = Math.cos(vehicle.angle) * trackRadius + arcCenterX;
-    const vehicleY = Math.sin(vehicle.angle) * trackRadius;
-    const rotation = vehicle.angle + (vehicle.clockwise ? -Math.PI / 2 : Math.PI / 2);
-    vehicle.mesh.position.x = vehicleX;
-    vehicle.mesh.position.y = vehicleY;
-    vehicle.mesh.rotation.z = rotation;
-  });
-}
-
 function getPlayerSpeed() {
   if (accelerate) return speed * 2;
   if (decelerate) return speed * 0.5;
   return speed;
-}
-
-function addVehicle() {
-  const vehicleTypes = ['car', 'truck'];
-  const type = vehicleTypes[Math.floor(Math.random() * vehicleTypes.length)];
-  const vehicleSpeed = getVehicleSpeed(type);
-  const clockwise = Math.random() >= 0.5;
-  const angle = clockwise ? Math.PI / 2 : -Math.PI / 2;
-  const mesh = type === 'car' ? Car() : Truck();
-  scene.add(mesh);
-  otherVehicles.push({ mesh, type, speed: vehicleSpeed, clockwise, angle });
-  // Play car starting/running sound
-  if (carStartSound.isPlaying) carStartSound.stop();
-  carStartSound.play();
-}
-
-function getVehicleSpeed(type) {
-  if (type === 'car') {
-    const minimumSpeed = 1;
-    const maximumSpeed = 2;
-    return minimumSpeed + Math.random() * (maximumSpeed - minimumSpeed);
-  }
-  if (type === 'truck') {
-    const minimumSpeed = 0.6;
-    const maximumSpeed = 1.5;
-    return minimumSpeed + Math.random() * (maximumSpeed - minimumSpeed);
-  }
 }
 
 function animation(timestamp) {
@@ -134,68 +97,18 @@ function animation(timestamp) {
     score = laps;
     setScore(score);
   }
-  if (otherVehicles.length < (laps + 1) / 5) addVehicle();
-  moveOtherVehicles(timeDelta);
-  hitDetection();
+  if (otherVehicles.length < (laps + 1) / 5) addVehicle(scene, otherVehicles, Car, Truck);
+  moveOtherVehicles(otherVehicles, speed, timeDelta, trackRadius, arcCenterX);
+  checkCollision({
+    playerCar,
+    playerAngleInitial,
+    playerAngleMoved,
+    otherVehicles,
+    showResults,
+    stopAnimationLoop
+  });
   renderer.render(scene, camera);
   lastTimestamp = timestamp;
-}
-
-function getHitZonePosition(center, angle, clockwise, distance) {
-  const directionAngle = angle + (clockwise ? -Math.PI / 2 : +Math.PI / 2);
-  return {
-    x: center.x + Math.cos(directionAngle) * distance,
-    y: center.y + Math.sin(directionAngle) * distance
-  };
-}
-
-function getDistance(c1, c2) {
-  const dx = c2.x - c1.x;
-  const dy = c2.y - c1.y;
-  return Math.sqrt(dx * dx + dy * dy);
-}
-
-function hitDetection() {
-  const playerHitZone1 = getHitZonePosition(
-    playerCar.position,
-    playerAngleInitial + playerAngleMoved,
-    true,
-    15
-  );
-  const playerHitZone2 = getHitZonePosition(
-    playerCar.position,
-    playerAngleInitial + playerAngleMoved,
-    true,
-    -15
-  );
-  const hit = otherVehicles.some(vehicle => {
-    if (vehicle.type === 'car') {
-      const vehicleHitZone1 = getHitZonePosition(vehicle.mesh.position, vehicle.angle, vehicle.clockwise, 15);
-      const vehicleHitZone2 = getHitZonePosition(vehicle.mesh.position, vehicle.angle, vehicle.clockwise, -15);
-      if (getDistance(playerHitZone1, vehicleHitZone1) < 40) return true;
-      if (getDistance(playerHitZone1, vehicleHitZone2) < 40) return true;
-      if (getDistance(playerHitZone2, vehicleHitZone1) < 40) return true;
-    }
-    if (vehicle.type === 'truck') {
-      const vehicleHitZone1 = getHitZonePosition(vehicle.mesh.position, vehicle.angle, vehicle.clockwise, 35);
-      const vehicleHitZone2 = getHitZonePosition(vehicle.mesh.position, vehicle.angle, vehicle.clockwise, 0);
-      const vehicleHitZone3 = getHitZonePosition(vehicle.mesh.position, vehicle.angle, vehicle.clockwise, -35);
-      if (getDistance(playerHitZone1, vehicleHitZone1) < 40) return true;
-      if (getDistance(playerHitZone1, vehicleHitZone2) < 40) return true;
-      if (getDistance(playerHitZone1, vehicleHitZone3) < 40) return true;
-      if (getDistance(playerHitZone2, vehicleHitZone1) < 40) return true;
-    }
-    return false;
-  });
-  if (hit) {
-    // Play crash sound
-    if (carCrashSound.isPlaying) carCrashSound.stop();
-    carCrashSound.play();
-    // Stop car engine sound
-    if (carStartSound.isPlaying) carStartSound.stop();
-    showResults(true);
-    stopAnimationLoop();
-  }
 }
 
 function positionScoreElement() {
@@ -216,19 +129,8 @@ setupUIHandlers({
   onStartKey: startGame
 });
 
-// Audio setup
-const carStartSound = new Audio(audioListener);
-const carCrashSound = new Audio(audioListener);
-const audioLoader = new AudioLoader();
-
-audioLoader.load('src/audio/car-start-iddle.wav', buffer => {
-  carStartSound.setBuffer(buffer);
-  carStartSound.setVolume(0.5);
-});
-audioLoader.load('src/audio/car-crash.wav', buffer => {
-  carCrashSound.setBuffer(buffer);
-  carCrashSound.setVolume(0.7);
-});
+// Initialize audio
+initAudio(audioListener);
 
 // Responsive
 window.addEventListener('resize', () => {
