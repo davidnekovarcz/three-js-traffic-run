@@ -5,7 +5,8 @@ import {
   AmbientLight,
   DirectionalLight,
   GridHelper,
-  HemisphereLight
+  HemisphereLight,
+  AudioListener
 } from 'three';
 
 // Scene setup
@@ -23,6 +24,10 @@ const camera = new OrthographicCamera(
 );
 camera.position.set(0, -210, 300);
 camera.lookAt(0, 0, 0);
+
+// Add AudioListener to camera
+const audioListener = new AudioListener();
+camera.add(audioListener);
 
 const scene = new Scene();
 
@@ -78,5 +83,6 @@ export {
   stopAnimationLoop,
   addGridHelper,
   cameraWidth,
-  cameraHeight
+  cameraHeight,
+  audioListener
 }; 

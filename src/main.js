@@ -6,7 +6,8 @@ import {
   setAnimationLoop,
   stopAnimationLoop,
   cameraWidth,
-  cameraHeight
+  cameraHeight,
+  audioListener // Import audioListener
 } from './scene.js';
 import { Car, Truck, Tree } from './vehicles.js';
 import {
@@ -21,6 +22,7 @@ import {
   setButtonsOpacity,
   setupUIHandlers
 } from './ui.js';
+import { Audio, AudioLoader } from 'three';
 
 // Game state
 let playerCar;
@@ -102,6 +104,9 @@ function addVehicle() {
   const mesh = type === 'car' ? Car() : Truck();
   scene.add(mesh);
   otherVehicles.push({ mesh, type, speed: vehicleSpeed, clockwise, angle });
+  // Play car starting/running sound
+  if (carStartSound.isPlaying) carStartSound.stop();
+  carStartSound.play();
 }
 
 function getVehicleSpeed(type) {
@@ -183,6 +188,9 @@ function hitDetection() {
     return false;
   });
   if (hit) {
+    // Play crash sound
+    if (carCrashSound.isPlaying) carCrashSound.stop();
+    carCrashSound.play();
     showResults(true);
     stopAnimationLoop();
   }
@@ -204,6 +212,20 @@ setupUIHandlers({
   onDecelerateDown: (val) => { decelerate = val; },
   onResetKey: reset,
   onStartKey: startGame
+});
+
+// Audio setup
+const carStartSound = new Audio(audioListener);
+const carCrashSound = new Audio(audioListener);
+const audioLoader = new AudioLoader();
+
+audioLoader.load('src/audio/car-start-iddle.wav', buffer => {
+  carStartSound.setBuffer(buffer);
+  carStartSound.setVolume(0.5);
+});
+audioLoader.load('src/audio/car-crash.wav', buffer => {
+  carCrashSound.setBuffer(buffer);
+  carCrashSound.setVolume(0.7);
 });
 
 // Responsive
