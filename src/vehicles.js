@@ -205,12 +205,13 @@ function getVehicleSpeed(type) {
   }
   if (type === 'truck') {
     const minimumSpeed = 0.6;
-    const maximumSpeed = 1.5;
+    const maximumSpeed = 1.0;
     return minimumSpeed + Math.random() * (maximumSpeed - minimumSpeed);
   }
 }
 
-function addVehicle(scene, otherVehicles, Car, Truck, playerCarColor) {
+// playerAngle is required for safe spawn
+function addVehicle(scene, otherVehicles, Car, Truck, playerCarColor, playerAngle) {
   // Exclude player color from vehicleColors
   let availableColors = vehicleColors.slice();
   if (playerCarColor !== null) {
@@ -222,12 +223,12 @@ function addVehicle(scene, otherVehicles, Car, Truck, playerCarColor) {
   const clockwise = Math.random() >= 0.5;
   const laneOffset = 20;
   const radius = clockwise ? (innerTrackRadius + laneOffset) : (outerTrackRadius - laneOffset);
-  let angle, mesh, collision;
-  // Try up to 10 times to find a non-colliding spawn
+  let angle, mesh, collision, safe;
+  // Always spawn on far side, at least 2 radians away from player
   for (let attempt = 0; attempt < 10; ++attempt) {
-    angle = clockwise ? Math.PI / 2 : -Math.PI / 2;
-    // Randomize angle a bit for variety
-    angle += (Math.random() - 0.5) * Math.PI * 2;
+    // Far side: playerAngle + PI, plus some randomization
+    const baseAngle = (playerAngle !== undefined ? playerAngle : 0) + Math.PI;
+    angle = baseAngle + (Math.random() - 0.5) * Math.PI / 2; // +/- 45deg
     // Use availableColors for this car/truck
     mesh = (type === 'car' ? Car : Truck)(availableColors);
     // Compute spawn position
@@ -235,13 +236,19 @@ function addVehicle(scene, otherVehicles, Car, Truck, playerCarColor) {
     const y = Math.sin(angle) * radius;
     mesh.position.x = x;
     mesh.position.y = y;
+    // Ensure not too close to player or other vehicles
+    safe = true;
+    if (playerAngle !== undefined) {
+      const dAngle = Math.abs(Math.atan2(Math.sin(angle - playerAngle), Math.cos(angle - playerAngle)));
+      if (dAngle < 2.0) safe = false; // at least 2 radians away
+    }
     collision = otherVehicles.some(v => {
       if (v.radius !== radius) return false;
       const dx = v.mesh.position.x - x;
       const dy = v.mesh.position.y - y;
       return Math.sqrt(dx * dx + dy * dy) < 70;
     });
-    if (!collision) break;
+    if (!collision && safe) break;
   }
   scene.add(mesh);
   otherVehicles.push({ mesh, type, speed: vehicleSpeed, clockwise, angle, radius });
