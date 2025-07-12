@@ -144,7 +144,8 @@ function animation(timestamp) {
     score = laps;
     setScore(score);
   }
-  if (otherVehicles.length < (laps + 1) / 5) addVehicle(scene, otherVehicles, Car, Truck, playerCarColor);
+  // Change: spawn a new car after every 3 laps (not 5)
+  if (otherVehicles.length < (laps + 1) / 3) addVehicle(scene, otherVehicles, Car, Truck, playerCarColor);
   moveOtherVehicles(otherVehicles, speed, timeDelta, trackRadius, arcCenterX);
   const hit = checkCollision({
     playerCar,

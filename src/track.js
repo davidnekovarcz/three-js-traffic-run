@@ -56,6 +56,30 @@ function getLineMarkings(mapWidth, mapHeight) {
     Math.PI * 2
   );
   context.stroke();
+
+  // Draw finish line at the left side of the left circle (lap counter position)
+  const finishAngle = Math.PI; // left side of the left circle
+  const finishLineWidth = 8; // match middle line width
+  const centerX = mapWidth / 2 - arcCenterX;
+  const centerY = mapHeight / 2;
+  const rInner = innerTrackRadius + 20;
+  const rOuter = outerTrackRadius - 20;
+  const x1 = centerX + Math.cos(finishAngle) * rInner;
+  const y1 = centerY + Math.sin(finishAngle) * rInner;
+  const x2 = centerX + Math.cos(finishAngle) * rOuter;
+  const y2 = centerY + Math.sin(finishAngle) * rOuter;
+  context.save();
+  context.globalAlpha = 0.7; // semi-transparent
+  context.strokeStyle = '#fff';
+  context.lineWidth = finishLineWidth;
+  context.setLineDash([16, 16]); // dashed, like the middle line
+  context.beginPath();
+  context.moveTo(x1, y1);
+  context.lineTo(x2, y2);
+  context.stroke();
+  context.setLineDash([]); // reset dash
+  context.restore();
+
   return new CanvasTexture(canvas);
 }
 
