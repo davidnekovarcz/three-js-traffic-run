@@ -1,0 +1,38 @@
+{
+  "gameStates": {
+    "initial": {
+      "ready": false,
+      "paused": false,
+      "gameOver": false,
+      "score": 0,
+      "playerLane": "inner"
+    },
+    "playing": {
+      "ready": true,
+      "paused": false,
+      "gameOver": false,
+      "score": 0,
+      "playerLane": "inner"
+    },
+    "paused": {
+      "ready": true,
+      "paused": true,
+      "gameOver": false,
+      "score": 2,
+      "playerLane": "outer"
+    }
+  },
+  "testViewports": [
+    { "width": 1920, "height": 1080, "name": "desktop-large" },
+    { "width": 1280, "height": 720, "name": "desktop-standard" },
+    { "width": 800, "height": 600, "name": "tablet" },
+    { "width": 1440, "height": 900, "name": "desktop-wide" }
+  ],
+  "trackConstants": {
+    "trackRadius": 225,
+    "trackWidth": 45,
+    "innerTrackRadius": 180,
+    "outerTrackRadius": 270,
+    "arcCenterX": 200
+  }
+}

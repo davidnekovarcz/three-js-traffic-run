@@ -101,41 +101,9 @@ traffic-run-three-js/
 
    Navigate to <http://localhost:5173/>
 
-## Architecture Patterns
 
-### Core Systems
 
-- **Game Class**: `/src/core/Game.js` - Main game state and lifecycle management
-- **Renderer**: `/src/core/Renderer.js` - Three.js scene/camera/renderer abstraction
-- **Event Bus**: `/src/core/EventBus.js` - Pub/sub pattern for component communication
-- **Config**: `/src/core/Config.js` - Centralized configuration with environment overrides
-- **Logger**: `/src/core/Logger.js` - Enhanced logging with levels and error handling
 
-### Entity System
-
-- **Vehicle Classes**: `/src/entities/Vehicle.js`
-  - `Vehicle` (base class)
-  - `PlayerVehicle` (lane switching, input handling)
-  - `NPCVehicle` (AI behavior, random generation)
-
-## Recent Work
-
-### Completed Refactoring (Latest)
-
-- ✅ **Game Class Pattern**: Created TrafficRunGame class encapsulating all game state and logic
-- ✅ **Renderer Separation**: Separated Three.js rendering logic into GameRenderer class
-- ✅ **Audio Assets**: Moved audio files to /src/assets/audio/
-- ✅ **Vehicle OOP**: Created proper Vehicle class hierarchy (Base, Player, NPC)
-- ✅ **Event System**: Implemented EventBus for component communication
-- ✅ **State Management**: Fixed DRY issue with centralized default state pattern  
-- ✅ **Configuration System**: Added GameConfig with environment overrides
-- ✅ **Error Handling**: Enhanced logging system with levels and performance tracking
-- ✅ **Integration**: Successfully integrated EventBus, Config, and Logger into Game.js
-
-### Previous Attempts
-
-- User explored migrating to React Three Fiber but decided to keep Vanilla JS implementation
-- Project uses Vite as build tool with Three.js v0.178.0
 
 ## 🧪 Testing
 
@@ -148,7 +116,7 @@ Multiple test pages are available in the `/test/` folder:
 ## 📊 Project Stats
 
 - **Source Files**: 16 files
-- **Test Files**: 14 files
+- **Test Files**: 0 files
 - **Dependencies**: 1 packages
 - **Last Updated**: 7/25/2025
 
