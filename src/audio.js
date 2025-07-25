@@ -9,13 +9,18 @@ export function initAudio(audioListener) {
   carEngineSound = new Audio(audioListener);
   carCrashSound = new Audio(audioListener);
 
-  audioLoader.load('src/audio/car-start-iddle.wav', buffer => {
+  audioLoader.load('src/assets/audio/car-start-iddle.wav', buffer => {
     carEngineSound.setBuffer(buffer);
     carEngineSound.setVolume(0.5);
+  }, undefined, error => {
+    console.warn('Could not load engine audio:', error);
   });
-  audioLoader.load('src/audio/car-crash.wav', buffer => {
+  
+  audioLoader.load('src/assets/audio/car-crash.wav', buffer => {
     carCrashSound.setBuffer(buffer);
     carCrashSound.setVolume(carCrashDefaultVolume);
+  }, undefined, error => {
+    console.warn('Could not load crash audio:', error);
   });
 }
 

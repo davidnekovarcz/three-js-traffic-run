@@ -29,6 +29,8 @@ a:visited {
   max-width: 100px;
   text-align: center;
   line-height: 1.6em;
+  z-index: 10;
+  pointer-events: none;
 }
 
 #controls {

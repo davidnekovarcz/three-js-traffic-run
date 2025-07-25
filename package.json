@@ -6,7 +6,15 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "sync-docs": "node scripts/sync-docs.js",
+    "docs": "npm run sync-docs",
+    "install-hooks": "node scripts/install-hooks.js",
+    "postinstall": "npm run install-hooks",
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run",
+    "test:e2e": "cypress run",
+    "test:e2e:dev": "cypress open"
   },
   "devDependencies": {
     "vite": "^7.0.4"
