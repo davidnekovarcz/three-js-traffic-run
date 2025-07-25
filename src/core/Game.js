@@ -59,6 +59,9 @@ export class TrafficRunGame {
     // Initialize state from default
     this.state = this.createInitialState()
     
+    // Track timeouts for cleanup on reset
+    this.activeTimeouts = new Set()
+    
     this.isInitialized = false
     
     this.logger.info('TrafficRunGame instance created')
@@ -70,6 +73,22 @@ export class TrafficRunGame {
   createInitialState() {
     // Deep clone using JSON for browser compatibility
     return JSON.parse(JSON.stringify(DEFAULT_GAME_STATE))
+  }
+  
+  /**
+   * Clear all active timeouts to prevent delayed operations after reset
+   */
+  clearAllTimeouts() {
+    this.activeTimeouts.forEach(timeoutId => clearTimeout(timeoutId))
+    this.activeTimeouts.clear()
+  }
+  
+  /**
+   * Track a timeout so it can be cleared on reset
+   */
+  trackTimeout(timeoutId) {
+    this.activeTimeouts.add(timeoutId)
+    return timeoutId
   }
   
   /**
@@ -134,6 +153,11 @@ export class TrafficRunGame {
       
       // Create player car
       this.state.playerCar = Car([this.state.playerCarColor])
+      
+      // Mark as player car to prevent cleanup removal
+      this.state.playerCar.userData.isPlayerCar = true
+      delete this.state.playerCar.userData.isVehicle  // Remove generic vehicle marker
+      
       this.renderer.addToScene(this.state.playerCar)
       
       // Get camera dimensions
@@ -236,7 +260,13 @@ export class TrafficRunGame {
   /**
    * Reset the game to initial state
    */
-  reset() {
+  reset(autoStart = false) {
+    // Stop animation loop first to prevent ongoing operations
+    this.renderer.stopAnimationLoop()
+    
+    // Clear any pending timeouts that might show results after reset
+    this.clearAllTimeouts()
+    
     // Preserve references that should not be reset
     const preservedRefs = {
       playerCar: this.state.playerCar,
@@ -249,23 +279,23 @@ export class TrafficRunGame {
     // Restore preserved references
     Object.assign(this.state, preservedRefs)
     
-    // Update UI
-    setScore('Press UP')
+    // Update UI - show score 0 if auto-starting, otherwise show "Press UP"
+    setScore(autoStart ? '0' : 'Press UP')
     
     // Position score element properly
     this.positionScoreElement()
     
-    // Clean up vehicles and explosions
+    // Clean up vehicles and explosions BEFORE hiding results
     this.cleanupVehicles()
+    
+    // Hide results dialog
+    showResults(false)
     
     // Reset player car position
     this.movePlayerCar(0)
     
     // Restore player car visuals
     this.restorePlayerCarVisuals()
-    
-    // Hide results
-    showResults(false)
     
     this.logger.info('Game reset')
     
@@ -282,7 +312,9 @@ export class TrafficRunGame {
       return
     }
     
-    if (this.state.gameOverPending) {
+    // Stop all game logic if game is over
+    if (this.state.gameOver || this.state.gameOverPending) {
+      // Only render the current frame, don't update anything
       this.renderer.render()
       this.state.lastTimestamp = timestamp
       return
@@ -310,12 +342,16 @@ export class TrafficRunGame {
       otherVehicles: this.state.otherVehicles,
       showResults,
       stopAnimationLoop: this.renderer.stopAnimationLoop.bind(this.renderer),
-      scene: this.renderer.getScene()
+      scene: this.renderer.getScene(),
+      timeoutTracker: this.trackTimeout.bind(this)
     })
     
     if (hit) {
       this.state.gameOverPending = true
       this.state.gameOver = true
+      // Clear any active input states
+      this.state.accelerate = false
+      this.state.decelerate = false
       return
     }
     
@@ -405,7 +441,8 @@ export class TrafficRunGame {
    * Switch player lane
    */
   switchLane(direction) {
-    if (this.state.paused || this.state.gameOver) return
+    // Don't allow lane switching when paused or game over
+    if (this.state.paused || this.state.gameOver || this.state.gameOverPending) return
     
     if (direction === 'left') {
       this.state.playerLane = 'outer'
@@ -443,13 +480,46 @@ export class TrafficRunGame {
       vehicle.crashed = false
     })
     
+    // Force cleanup of any remaining vehicle/explosion meshes in the scene
+    const scene = this.renderer.getScene()
+    const objectsToRemove = []
+    scene.traverse(child => {
+      // Skip the player car - don't remove it
+      if (child === this.state.playerCar || (child.userData && child.userData.isPlayerCar)) {
+        return
+      }
+      
+      // Look for AI vehicle meshes or explosion spheres that might still be in scene
+      if (child.userData && (child.userData.isVehicle || child.userData.isExplosion)) {
+        objectsToRemove.push(child)
+      }
+      // Also check for explosion spheres by geometry type
+      if (child.geometry && child.geometry.type === 'SphereGeometry' && 
+          child.material && child.material.color && 
+          child.material.color.getHex() === 0xffaa00) {
+        objectsToRemove.push(child)
+      }
+    })
+    
+    objectsToRemove.forEach(obj => {
+      scene.remove(obj)
+      if (obj.geometry) obj.geometry.dispose()
+      if (obj.material) {
+        if (Array.isArray(obj.material)) {
+          obj.material.forEach(mat => mat.dispose())
+        } else {
+          obj.material.dispose()
+        }
+      }
+    })
+    
     // Clear the array
     this.state.otherVehicles = []
     
     // Force a render to update the scene
     this.renderer.render()
     
-    this.logger.debug('All vehicles cleaned up')
+    this.logger.debug(`All vehicles cleaned up, removed ${objectsToRemove.length} orphaned objects`)
   }
   
   /**
@@ -505,10 +575,27 @@ export class TrafficRunGame {
   setupInputHandlers() {
     // Setup UI handlers
     setupUIHandlers({
-      onAccelerateDown: (val) => { if (!this.state.paused) this.state.accelerate = val },
-      onDecelerateDown: (val) => { if (!this.state.paused) this.state.decelerate = val },
-      onResetKey: () => this.reset(),
+      onAccelerateDown: (val) => { 
+        if (!this.state.paused && !this.state.gameOver) this.state.accelerate = val 
+      },
+      onDecelerateDown: (val) => { 
+        if (!this.state.paused && !this.state.gameOver) this.state.decelerate = val 
+      },
+      onResetKey: () => {
+        // Only allow reset when game is over or not started
+        if (!this.state.gameOver && this.state.ready) {
+          return  // Don't reset during active gameplay
+        }
+        
+        const wasGameOver = this.state.gameOver
+        this.reset(wasGameOver)  // Pass autoStart flag
+        // If resetting from game over, start the game immediately
+        if (wasGameOver) {
+          this.start()
+        }
+      },
       onStartKey: () => { 
+        if (this.state.gameOver) return  // Don't start if game is over
         if (this.state.paused) this.resume()
         else this.start()
       },
@@ -520,6 +607,9 @@ export class TrafficRunGame {
     window.addEventListener('keydown', (event) => {
       if (event.key === ' ') {
         event.preventDefault()
+        // Don't allow pause/resume when game is over
+        if (this.state.gameOver) return
+        
         if (this.state.paused) {
           this.resume()
         } else if (this.state.ready) {

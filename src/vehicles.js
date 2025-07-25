@@ -87,6 +87,9 @@ function Car(availableColors = vehicleColors) {
   main.castShadow = true;
   main.receiveShadow = true;
   car.add(main);
+  
+  // Mark as vehicle for cleanup detection
+  car.userData.isVehicle = true;
   const carFrontTexture = getCarFrontTexture();
   carFrontTexture.center = new Vector2(0.5, 0.5);
   carFrontTexture.rotation = Math.PI / 2;
@@ -123,6 +126,9 @@ function Truck(availableColors = vehicleColors) {
   const base = new Mesh(new BoxGeometry(100, 25, 5), new MeshLambertMaterial({ color: 0xb4c6fc }));
   base.position.z = 10;
   truck.add(base);
+  
+  // Mark as vehicle for cleanup detection
+  truck.userData.isVehicle = true;
   const cargo = new Mesh(new BoxGeometry(75, 35, 40), new MeshLambertMaterial({ color: 0xffffff }));
   cargo.position.x = -15;
   cargo.position.z = 30;

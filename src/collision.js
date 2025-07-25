@@ -16,7 +16,7 @@ function getDistance(c1, c2) {
 }
 
 // Helper: Mark vehicle as crashed, change appearance, show explosion, and schedule removal
-function destroyVehicle(vehicle, scene, otherVehicles, isPlayer = false) {
+function destroyVehicle(vehicle, scene, otherVehicles, isPlayer = false, timeoutTracker = null) {
   vehicle.crashed = true;
   playCarCrashQuiet();
   // Change appearance: blend 70% black with original color, 30% transparent
@@ -48,6 +48,7 @@ function destroyVehicle(vehicle, scene, otherVehicles, isPlayer = false) {
     new THREE.MeshBasicMaterial({ color: 0xffaa00, transparent: true, opacity: 0.8 })
   );
   explosion.position.copy(vehicle.mesh.position);
+  explosion.userData.isExplosion = true; // Mark for cleanup detection
   scene.add(explosion);
   vehicle.explosionMesh = explosion;
   let scale = 1;
@@ -64,7 +65,7 @@ function destroyVehicle(vehicle, scene, otherVehicles, isPlayer = false) {
   };
   grow();
   if (!isPlayer) {
-    setTimeout(() => {
+    const timeoutId = setTimeout(() => {
       scene.remove(vehicle.mesh);
       if (vehicle.explosionMesh) {
         scene.remove(vehicle.explosionMesh);
@@ -73,6 +74,11 @@ function destroyVehicle(vehicle, scene, otherVehicles, isPlayer = false) {
       const idx = otherVehicles.indexOf(vehicle);
       if (idx !== -1) otherVehicles.splice(idx, 1);
     }, 2000);
+    
+    // Track timeout for cleanup on reset
+    if (timeoutTracker) {
+      timeoutTracker(timeoutId);
+    }
   }
 }
 
@@ -93,7 +99,8 @@ export function checkCollision({
   otherVehicles,
   showResults,
   stopAnimationLoop,
-  scene // Pass scene for explosion
+  scene, // Pass scene for explosion
+  timeoutTracker = null // Function to track timeouts for cleanup
 }) {
   // Track vehicles involved in player collision
   const playerCollidedVehicles = new Set();
@@ -139,14 +146,20 @@ export function checkCollision({
   });
   if (hit) {
     // Destroy both the player's car and the collided vehicle BEFORE game over
-    if (collidedVehicle) destroyVehicle(collidedVehicle, scene, otherVehicles);
-    destroyVehicle({ mesh: playerCar, crashed: false }, scene, [], true);
+    if (collidedVehicle) destroyVehicle(collidedVehicle, scene, otherVehicles, false, timeoutTracker);
+    destroyVehicle({ mesh: playerCar, crashed: false }, scene, [], true, timeoutTracker);
     playCarCrash();
     stopCarEngine();
-    setTimeout(() => {
+    const gameOverTimeoutId = setTimeout(() => {
       showResults(true);
       stopAnimationLoop();
     }, 1000); // Delay game over by 1s for animation
+    
+    // Track the game over timeout for cleanup on reset
+    if (timeoutTracker) {
+      timeoutTracker(gameOverTimeoutId);
+    }
+    
     return true;
   }
   // Car-to-car collisions in the same lane (skip vehicles involved in player collision)
@@ -156,8 +169,8 @@ export function checkCollision({
       const v2 = otherVehicles[j];
       if (playerCollidedVehicles.has(v1) || playerCollidedVehicles.has(v2)) continue;
       if (vehiclesCollide(v1, v2)) {
-        destroyVehicle(v1, scene, otherVehicles);
-        destroyVehicle(v2, scene, otherVehicles);
+        destroyVehicle(v1, scene, otherVehicles, false, timeoutTracker);
+        destroyVehicle(v2, scene, otherVehicles, false, timeoutTracker);
       }
     }
   }
