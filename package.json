@@ -6,7 +6,11 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "sync-docs": "node scripts/sync-docs.js",
+    "docs": "npm run sync-docs",
+    "install-hooks": "node scripts/install-hooks.js",
+    "postinstall": "npm run install-hooks"
   },
   "devDependencies": {
     "vite": "^7.0.4"

@@ -1,6 +1,6 @@
-# Traffic Run Three.js Game
+# traffic-run-three-js
 
-A browser-based 3D racing/dodging game built with Three.js and Vite. Navigate a figure-8 track while avoiding AI vehicles to complete laps and increase your score.
+Browser-based 3D racing/dodging game built with Three.js
 
 ## 🎮 Live Demo
 
@@ -101,7 +101,7 @@ traffic-run-three-js/
 
    Navigate to <http://localhost:5173/>
 
-## 🏗️ Architecture
+## Architecture Patterns
 
 ### Core Systems
 
@@ -118,27 +118,24 @@ traffic-run-three-js/
   - `PlayerVehicle` (lane switching, input handling)
   - `NPCVehicle` (AI behavior, random generation)
 
-## 🎉 Recent Refactoring
+## Recent Work
 
-### ✅ Successfully Integrated All New Systems
+### Completed Refactoring (Latest)
 
-1. **EventBus System** - Full event-driven architecture with game lifecycle events
-2. **Config System** - Environment-based configuration with validation
-3. **Logger System** - Enhanced logging with performance timing and error handling
-4. **Vehicle Classes** - OOP vehicle system with inheritance (Base/Player/NPC) + VehicleManager
-5. **Error Handling** - Comprehensive error catching and browser compatibility fixes
-6. **Testing Suite** - Multiple test pages in `/test/` folder for debugging
+- ✅ **Game Class Pattern**: Created TrafficRunGame class encapsulating all game state and logic
+- ✅ **Renderer Separation**: Separated Three.js rendering logic into GameRenderer class
+- ✅ **Audio Assets**: Moved audio files to /src/assets/audio/
+- ✅ **Vehicle OOP**: Created proper Vehicle class hierarchy (Base, Player, NPC)
+- ✅ **Event System**: Implemented EventBus for component communication
+- ✅ **State Management**: Fixed DRY issue with centralized default state pattern  
+- ✅ **Configuration System**: Added GameConfig with environment overrides
+- ✅ **Error Handling**: Enhanced logging system with levels and performance tracking
+- ✅ **Integration**: Successfully integrated EventBus, Config, and Logger into Game.js
 
-### 🔧 Key Fixes Made
+### Previous Attempts
 
-- Replaced `structuredClone` with `JSON.parse/stringify` for browser compatibility
-- Fixed `import.meta.env` with try/catch fallback
-- Added defensive DOM element appending in Renderer
-- Enhanced error reporting with full stack traces
-- Created test pages for step-by-step debugging
-- Fixed Three.js shadow system compatibility issues
-- Restored original score positioning logic from !old folder
-- Added responsive CSS styling for score element
+- User explored migrating to React Three Fiber but decided to keep Vanilla JS implementation
+- Project uses Vite as build tool with Three.js v0.178.0
 
 ## 🧪 Testing
 
@@ -147,6 +144,13 @@ Multiple test pages are available in the `/test/` folder:
 - **`/test/final-test.html`** - Complete game test with UI
 - **`/test/browser-test.html`** - Step-by-step module loading test
 - **`/test/simple-game.html`** - Minimal game test
+
+## 📊 Project Stats
+
+- **Source Files**: 16 files
+- **Test Files**: 13 files
+- **Dependencies**: 1 packages
+- **Last Updated**: 7/25/2025
 
 ## 📝 Development Notes
 
