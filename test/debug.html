@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Game</title>
+</head>
+<body>
+    <div id="output" style="font-family: monospace; padding: 20px;"></div>
+    <script type="module">
+        const log = (msg, isError = false) => {
+            const output = document.getElementById('output');
+            const color = isError ? 'red' : 'green';
+            output.innerHTML += `<div style="color: ${color}">${msg}</div>`;
+            console.log(msg);
+        };
+
+        try {
+            log('1. Testing basic imports...');
+            
+            // Test EventBus
+            try {
+                const { eventBus, GameEvents } = await import('./src/core/EventBus.js');
+                log('✓ EventBus loaded');
+            } catch (e) {
+                log('✗ EventBus error: ' + e.message, true);
+                throw e;
+            }
+
+            // Test Config
+            try {
+                const { gameConfig, loadEnvironmentConfig } = await import('./src/core/Config.js');
+                log('✓ Config loaded');
+            } catch (e) {
+                log('✗ Config error: ' + e.message, true);
+                throw e;
+            }
+
+            // Test Logger
+            try {
+                const { createLogger, errorHandler } = await import('./src/core/Logger.js');
+                log('✓ Logger loaded');
+            } catch (e) {
+                log('✗ Logger error: ' + e.message, true);
+                throw e;
+            }
+
+            // Test Renderer
+            try {
+                const { GameRenderer } = await import('./src/core/Renderer.js');
+                log('✓ Renderer loaded');
+            } catch (e) {
+                log('✗ Renderer error: ' + e.message, true);
+                throw e;
+            }
+
+            // Test Game
+            try {
+                const { TrafficRunGame } = await import('./src/core/Game.js');
+                log('✓ Game module loaded');
+                
+                const game = new TrafficRunGame();
+                log('✓ Game instance created');
+                
+                await game.init();
+                log('✓ Game initialized!');
+                
+            } catch (e) {
+                log('✗ Game error: ' + e.message, true);
+                log('Stack trace: ' + e.stack, true);
+                throw e;
+            }
+
+            log('🎉 All tests passed!');
+
+        } catch (error) {
+            log('Fatal error: ' + error.message, true);
+            console.error(error);
+        }
+    </script>
+</body>
+</html>

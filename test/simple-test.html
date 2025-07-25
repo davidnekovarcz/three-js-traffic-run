@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple Test</title>
+</head>
+<body>
+    <div id="status">Testing...</div>
+    <div id="error" style="color: red;"></div>
+    
+    <script type="module">
+        const status = document.getElementById('status');
+        const error = document.getElementById('error');
+        
+        try {
+            // Minimal test
+            status.textContent = 'Loading Three.js...';
+            const THREE = await import('three');
+            
+            status.textContent = 'Loading Game...';
+            const { TrafficRunGame } = await import('../src/core/Game.js');
+            
+            status.textContent = 'Creating game instance...';
+            const game = new TrafficRunGame();
+            
+            status.textContent = 'SUCCESS! Game instance created.';
+            
+        } catch (e) {
+            status.textContent = 'FAILED';
+            error.textContent = `Error: ${e.message}\n\nStack: ${e.stack}`;
+            console.error('Test failed:', e);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Game Initialization</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        .success { color: #4caf50; }
+        .error { color: #f44336; }
+        .warning { color: #ff9800; }
+        .info { color: #2196f3; }
+        pre { 
+            background: #333; 
+            padding: 10px; 
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <!-- Add required HTML elements that the game expects -->
+    <div id="score" style="display: none;">Press UP</div>
+    <div id="controls" style="display: none;">
+        <div id="buttons">
+            <button id="accelerate"></button>
+            <button id="decelerate"></button>
+        </div>
+        <div id="instructions"></div>
+    </div>
+    <div id="results" style="display: none;"></div>
+    <div id="pause-dialog" style="display: none;"></div>
+    
+    <div id="test-output"></div>
+    
+    <script type="module">
+        const output = document.getElementById('test-output');
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            output.innerHTML += `<p class="${type}">[${timestamp}] ${message}</p>`;
+            console.log(`[${type}] ${message}`);
+        }
+        
+        async function testModule(name, importPath) {
+            try {
+                log(`Testing ${name}...`);
+                const module = await import(importPath);
+                log(`✓ ${name} loaded successfully`, 'success');
+                return module;
+            } catch (error) {
+                log(`✗ Failed to load ${name}: ${error.message}`, 'error');
+                log(`Stack trace:\n${error.stack}`, 'error');
+                throw error;
+            }
+        }
+        
+        async function runTests() {
+            try {
+                // Test individual core modules first
+                log('=== Testing Core Modules ===', 'info');
+                
+                await testModule('Config', './src/core/Config.js');
+                await testModule('Logger', './src/core/Logger.js');
+                await testModule('EventBus', './src/core/EventBus.js');
+                await testModule('Renderer', './src/core/Renderer.js');
+                
+                log('=== Testing Support Modules ===', 'info');
+                
+                await testModule('Vehicles', './src/vehicles.js');
+                await testModule('Track', './src/track.js');
+                await testModule('UI', './src/ui.js');
+                await testModule('Audio', './src/audio.js');
+                await testModule('Collision', './src/collision.js');
+                
+                log('=== Testing Game Module ===', 'info');
+                
+                const GameModule = await testModule('Game', './src/core/Game.js');
+                
+                log('Creating game instance...', 'info');
+                const game = new GameModule.TrafficRunGame();
+                log('✓ Game instance created', 'success');
+                
+                // Make game accessible for debugging
+                window.game = game;
+                log('Game instance available as window.game for debugging', 'info');
+                
+                log('Initializing game...', 'info');
+                await game.init();
+                log('✓ Game initialized successfully!', 'success');
+                
+                // Test game state
+                const state = game.getState();
+                log(`Game state: ready=${state.ready}, paused=${state.paused}, gameOver=${state.gameOver}`, 'info');
+                
+            } catch (error) {
+                log(`Fatal error during initialization: ${error.message}`, 'error');
+                log(`Full stack trace:\n${error.stack}`, 'error');
+                
+                // Try to identify the specific import that failed
+                if (error.message.includes('Failed to fetch')) {
+                    log('This might be a CORS or network issue. Make sure Vite dev server is running.', 'warning');
+                } else if (error.message.includes('Unexpected token')) {
+                    log('This might be a syntax error in one of the modules.', 'warning');
+                } else if (error.message.includes('not defined')) {
+                    log('This might be a missing dependency or undefined variable.', 'warning');
+                }
+            }
+        }
+        
+        // Start tests
+        log('Starting game initialization tests...', 'info');
+        runTests();
+    </script>
+</body>
+</html>

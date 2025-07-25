@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Traffic Run - Simple Test</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        color: white;
+        font-family: Arial, sans-serif;
+        background: #000;
+      }
+      #score {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        font-size: 24px;
+        z-index: 100;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="score">Press UP</div>
+    <div id="controls" style="display: none;">
+      <div id="buttons">
+        <button id="accelerate">UP</button>
+        <button id="decelerate">DOWN</button>
+      </div>
+    </div>
+    <div id="results" style="display: none;">
+      <div class="content">
+        <h1>You hit another vehicle</h1>
+        <p>To reset the game press R</p>
+      </div>
+    </div>
+    <div id="pause-dialog" style="display:none; position: absolute; align-items: center; justify-content: center; height: 100%; width: 100%; background-color: rgba(20, 20, 20, 0.75); z-index: 52;">
+      <div class="content" style="max-width: 500px; padding: 50px; border-radius: 20px; text-align: center;">
+        <h1>Paused</h1>
+        <p>Press SPACE to resume</p>
+      </div>
+    </div>
+    
+    <script type="module" src="../main-simple.js"></script>
+  </body>
+</html>

@@ -1,11 +1,29 @@
-// UI element references
-const scoreElement = document.getElementById("score");
-const buttonsElement = document.getElementById("buttons");
-const instructionsElement = document.getElementById("instructions");
-const resultsElement = document.getElementById("results");
-const accelerateButton = document.getElementById("accelerate");
-const decelerateButton = document.getElementById("decelerate");
-const pauseDialogElement = document.getElementById('pause-dialog');
+// UI element references - will be initialized when DOM is ready
+let scoreElement = null;
+let buttonsElement = null;
+let instructionsElement = null;
+let resultsElement = null;
+let accelerateButton = null;
+let decelerateButton = null;
+let pauseDialogElement = null;
+
+// Initialize UI elements when DOM is ready
+function initializeUIElements() {
+  scoreElement = document.getElementById("score");
+  buttonsElement = document.getElementById("buttons");
+  instructionsElement = document.getElementById("instructions");
+  resultsElement = document.getElementById("results");
+  accelerateButton = document.getElementById("accelerate");
+  decelerateButton = document.getElementById("decelerate");
+  pauseDialogElement = document.getElementById('pause-dialog');
+}
+
+// Ensure elements are initialized
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initializeUIElements);
+} else {
+  initializeUIElements();
+}
 
 // Create arrow buttons
 const upButton = document.createElement('button');
@@ -44,7 +62,7 @@ dpad.innerHTML = `
 `;
 
 // Insert buttons into the dpad
-setTimeout(() => {
+function setupDpad() {
   const up = dpad.querySelector('#dpad-up');
   const down = dpad.querySelector('#dpad-down');
   const left = dpad.querySelector('#dpad-left');
@@ -53,12 +71,23 @@ setTimeout(() => {
   if (down) down.appendChild(downButton);
   if (left) left.appendChild(leftButton);
   if (right) right.appendChild(rightButton);
-}, 0);
+}
 
-const buttonsParent = document.getElementById('buttons');
-if (buttonsParent) {
-  buttonsParent.innerHTML = '';
-  buttonsParent.appendChild(dpad);
+// Setup dpad after DOM is ready
+function initializeDpad() {
+  const buttonsParent = document.getElementById('buttons');
+  if (buttonsParent) {
+    buttonsParent.innerHTML = '';
+    buttonsParent.appendChild(dpad);
+    setupDpad();
+  }
+}
+
+// Initialize dpad when DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initializeDpad);
+} else {
+  setTimeout(initializeDpad, 0);
 }
 
 // UI state and callbacks
@@ -86,6 +115,9 @@ function hidePauseDialog() {
   if (pauseDialogElement) pauseDialogElement.style.display = 'none';
 }
 function setupUIHandlers({ onAccelerateDown, onAccelerateUp, onDecelerateDown, onDecelerateUp, onResetKey, onStartKey, onLeftKey, onRightKey }) {
+  // Ensure UI elements are initialized
+  initializeUIElements();
+  
   onAccelerate = onAccelerateDown;
   onDecelerate = onDecelerateDown;
   onReset = onResetKey;

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Step by Step Debug</title>
+    <style>
+        body { font-family: monospace; padding: 20px; }
+        .success { color: green; }
+        .error { color: red; }
+        .step { margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>Game Debug</h1>
+    <div id="output"></div>
+    
+    <script type="module">
+        const output = document.getElementById('output');
+        let step = 1;
+        
+        function log(message, isError = false) {
+            const div = document.createElement('div');
+            div.className = `step ${isError ? 'error' : 'success'}`;
+            div.innerHTML = `${step++}. ${message}`;
+            output.appendChild(div);
+            console.log(message);
+        }
+        
+        async function testStep(name, fn) {
+            try {
+                await fn();
+                log(`✓ ${name}`);
+                return true;
+            } catch (error) {
+                log(`✗ ${name}: ${error.message}`, true);
+                console.error(`${name} error:`, error);
+                return false;
+            }
+        }
+        
+        async function runTests() {
+            // Test 1: Basic Three.js import
+            if (!await testStep('Three.js import', async () => {
+                const THREE = await import('three');
+                if (!THREE.Scene) throw new Error('Three.js Scene not found');
+            })) return;
+            
+            // Test 2: EventBus
+            if (!await testStep('EventBus module', async () => {
+                const { eventBus, GameEvents } = await import('../src/core/EventBus.js');
+                eventBus.emit('test', 'hello');
+            })) return;
+            
+            // Test 3: Config
+            if (!await testStep('Config module', async () => {
+                const { gameConfig, loadEnvironmentConfig } = await import('../src/core/Config.js');
+                const config = loadEnvironmentConfig();
+            })) return;
+            
+            // Test 4: Logger
+            if (!await testStep('Logger module', async () => {
+                const { createLogger } = await import('../src/core/Logger.js');
+                const logger = createLogger('Test');
+                logger.info('Test message');
+            })) return;
+            
+            // Test 5: Renderer
+            if (!await testStep('Renderer module', async () => {
+                const { GameRenderer } = await import('../src/core/Renderer.js');
+                const renderer = new GameRenderer();
+            })) return;
+            
+            // Test 6: Legacy modules
+            if (!await testStep('Legacy vehicles module', async () => {
+                const vehicles = await import('../src/vehicles.js');
+                if (!vehicles.Car) throw new Error('Car function not found');
+            })) return;
+            
+            if (!await testStep('Legacy track module', async () => {
+                const track = await import('../src/track.js');
+                if (!track.renderMap) throw new Error('renderMap function not found');
+            })) return;
+            
+            // Test 7: Game module
+            if (!await testStep('Game module import', async () => {
+                const { TrafficRunGame } = await import('../src/core/Game.js');
+                if (!TrafficRunGame) throw new Error('TrafficRunGame class not found');
+            })) return;
+            
+            // Test 8: Game instance creation
+            if (!await testStep('Game instance creation', async () => {
+                const { TrafficRunGame } = await import('../src/core/Game.js');
+                const game = new TrafficRunGame();
+                if (!game.logger) throw new Error('Game logger not initialized');
+            })) return;
+            
+            // Test 9: Game initialization
+            if (!await testStep('Game initialization', async () => {
+                const { TrafficRunGame } = await import('../src/core/Game.js');
+                const game = new TrafficRunGame();
+                await game.init();
+            })) return;
+            
+            log('🎉 All tests passed! Game should work now.');
+        }
+        
+        runTests().catch(error => {
+            log(`Fatal error: ${error.message}`, true);
+            console.error('Fatal error:', error);
+        });
+    </script>
+</body>
+</html>
