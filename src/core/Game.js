@@ -489,10 +489,13 @@ export class TrafficRunGame {
     const arcCenterXinPixels = (arcCenterX / dimensions.width) * window.innerWidth
     const scoreElement = document.getElementById('score')
     if (scoreElement) {
-      scoreElement.style.cssText = `
-        left: ${window.innerWidth / 2 - arcCenterXinPixels * 1.3}px;
-        top: ${window.innerHeight / 2}px
-      `
+      // Keep original CSS and only update position
+      scoreElement.style.left = `${window.innerWidth / 2 - arcCenterXinPixels * 1.3}px`
+      scoreElement.style.top = `${window.innerHeight / 2}px`
+      
+      // Debug log
+      this.logger.debug(`Score positioned at: left=${scoreElement.style.left}, top=${scoreElement.style.top}`)
+      this.logger.debug(`arcCenterX=${arcCenterX}, dimensions=${JSON.stringify(dimensions)}, window=${window.innerWidth}x${window.innerHeight}`)
     }
   }
   

@@ -148,7 +148,7 @@ Multiple test pages are available in the `/test/` folder:
 ## 📊 Project Stats
 
 - **Source Files**: 16 files
-- **Test Files**: 13 files
+- **Test Files**: 14 files
 - **Dependencies**: 1 packages
 - **Last Updated**: 7/25/2025
 

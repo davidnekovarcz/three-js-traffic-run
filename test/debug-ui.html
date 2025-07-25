@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug UI Positioning</title>
+    <style>
+        body { 
+            margin: 0; 
+            padding: 0; 
+            font-family: Arial, sans-serif; 
+            background: #000; 
+            color: white; 
+        }
+        
+        #debug-info {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 10px;
+            border-radius: 5px;
+            z-index: 200;
+            font-size: 12px;
+        }
+        
+        #score {
+            position: absolute;
+            font-family: "Press Start 2P", cursive;
+            font-size: 0.9em;
+            color: white;
+            transform: translate(-50%, -50%);
+            opacity: 0.9;
+            max-width: 100px;
+            text-align: center;
+            line-height: 1.6em;
+            background: rgba(255, 0, 0, 0.5); /* Red background for debugging */
+            border: 2px solid yellow; /* Yellow border for visibility */
+            z-index: 100;
+        }
+        
+        @media (min-height: 425px) {
+            #score {
+                font-size: 1.5em;
+                max-width: 150px;
+            }
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet">
+</head>
+<body>
+    <div id="debug-info">
+        <div>Window: <span id="window-size"></span></div>
+        <div>Score Position: <span id="score-position"></span></div>
+        <div>arcCenterX: <span id="arc-center-x"></span></div>
+        <div>Camera Width: <span id="camera-width"></span></div>
+        <div>Calculated Left: <span id="calculated-left"></span></div>
+    </div>
+    
+    <div id="score">TEST SCORE</div>
+    
+    <script type="module">
+        // Import track constants
+        const trackRadius = 225;
+        const trackWidth = 45;
+        const innerTrackRadius = trackRadius - trackWidth;
+        const outerTrackRadius = trackRadius + trackWidth;
+        const arcAngle1 = (1 / 3) * Math.PI;
+        const deltaY = Math.sin(arcAngle1) * innerTrackRadius;
+        const arcAngle2 = Math.asin(deltaY / outerTrackRadius);
+        const arcCenterX = (Math.cos(arcAngle1) * innerTrackRadius + Math.cos(arcAngle2) * outerTrackRadius) / 2;
+        
+        const cameraWidth = 960;
+        
+        function updateDebugInfo() {
+            const scoreElement = document.getElementById('score');
+            const windowSize = `${window.innerWidth}x${window.innerHeight}`;
+            const scoreRect = scoreElement.getBoundingClientRect();
+            const scorePos = `${Math.round(scoreRect.left)}, ${Math.round(scoreRect.top)}`;
+            
+            const arcCenterXinPixels = (arcCenterX / cameraWidth) * window.innerWidth;
+            const calculatedLeft = window.innerWidth / 2 - arcCenterXinPixels * 1.3;
+            
+            document.getElementById('window-size').textContent = windowSize;
+            document.getElementById('score-position').textContent = scorePos;
+            document.getElementById('arc-center-x').textContent = Math.round(arcCenterX);
+            document.getElementById('camera-width').textContent = cameraWidth;
+            document.getElementById('calculated-left').textContent = Math.round(calculatedLeft);
+        }
+        
+        function positionScore() {
+            const scoreElement = document.getElementById('score');
+            const arcCenterXinPixels = (arcCenterX / cameraWidth) * window.innerWidth;
+            
+            scoreElement.style.cssText = `
+                position: absolute;
+                font-family: "Press Start 2P", cursive;
+                font-size: 0.9em;
+                color: white;
+                transform: translate(-50%, -50%);
+                opacity: 0.9;
+                max-width: 100px;
+                text-align: center;
+                line-height: 1.6em;
+                background: rgba(255, 0, 0, 0.5);
+                border: 2px solid yellow;
+                z-index: 100;
+                left: ${window.innerWidth / 2 - arcCenterXinPixels * 1.3}px;
+                top: ${window.innerHeight / 2}px;
+            `;
+            
+            updateDebugInfo();
+        }
+        
+        // Position score immediately
+        positionScore();
+        
+        // Update on resize
+        window.addEventListener('resize', () => {
+            positionScore();
+        });
+        
+        // Update debug info every second
+        setInterval(updateDebugInfo, 1000);
+        
+        console.log('Debug values:');
+        console.log('arcCenterX:', arcCenterX);
+        console.log('cameraWidth:', cameraWidth);
+        console.log('window size:', window.innerWidth, 'x', window.innerHeight);
+    </script>
+</body>
+</html>
