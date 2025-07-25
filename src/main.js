@@ -19,6 +19,13 @@ class App {
       // Initialize the game
       await this.game.init()
       
+      // Force a render to ensure the game is visible
+      setTimeout(() => {
+        if (this.game.renderer) {
+          this.game.renderer.render()
+        }
+      }, 100)
+      
       console.log('Game ready! Press UP to start.')
       
     } catch (error) {

@@ -91,13 +91,13 @@ traffic-run-three-js/
 - Performance optimized for smooth 60fps gameplay
 - Modular architecture enables easier testing and maintenance
 - ✅ **Integration Complete**: All new systems integrated and working
-- ✅ **Dev server tested**: Successfully runs on http://localhost:5173/
+- ✅ **Dev server tested**: Successfully runs on <http://localhost:5173/>
 - 🎮 **Test Pages**: Available in `/test/` folder for debugging
 - 🚀 **Ready to Play**: Game initialization complete
 
 ## 🎉 REFACTORING COMPLETE - All TODOs Finished
 
-### ✅ Successfully Integrated All New Systems:
+### ✅ Successfully Integrated All New Systems
 
 1. **EventBus System** - Full event-driven architecture with game lifecycle events
 2. **Config System** - Environment-based configuration with validation  
@@ -106,22 +106,25 @@ traffic-run-three-js/
 5. **Error Handling** - Comprehensive error catching and browser compatibility fixes
 6. **Testing Suite** - Multiple test pages in `/test/` folder for debugging
 
-### 🔧 Key Fixes Made:
+### 🔧 Key Fixes Made
 
 - Replaced `structuredClone` with `JSON.parse/stringify` for browser compatibility
 - Fixed `import.meta.env` with try/catch fallback
 - Added defensive DOM element appending in Renderer
 - Enhanced error reporting with full stack traces
 - Created test pages for step-by-step debugging
+- Fixed Three.js shadow system compatibility issues
+- Restored original score positioning logic from !old folder
+- Added responsive CSS styling for score element
 
-### 🎮 Game Status:
+### 🎮 Game Status
 
-- **Dev Server**: Running on http://localhost:5173/
-- **Main Game**: http://localhost:5173/
-- **Test Pages**: http://localhost:5173/test/final-test.html
-- **Debug Tools**: http://localhost:5173/test/browser-test.html
+- **Dev Server**: Running on <http://localhost:5173/>
+- **Main Game**: <http://localhost:5173/>
+- **Test Pages**: <http://localhost:5173/test/final-test.html>
+- **Debug Tools**: <http://localhost:5173/test/browser-test.html>
 
-### 🛠 Final Architecture:
+### 🛠 Final Architecture
 
 - **Modular Core**: `/src/core/` (Game, Renderer, EventBus, Config, Logger)
 - **Entity System**: `/src/entities/` (Vehicle classes) + VehicleManager bridge

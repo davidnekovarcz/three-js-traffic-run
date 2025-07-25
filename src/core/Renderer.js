@@ -99,20 +99,33 @@ export class GameRenderer {
     
     this.renderer.setSize(window.innerWidth, window.innerHeight)
     
+    // Ensure canvas fills the screen
+    this.renderer.domElement.style.display = 'block'
+    this.renderer.domElement.style.position = 'fixed'
+    this.renderer.domElement.style.top = '0'
+    this.renderer.domElement.style.left = '0'
+    this.renderer.domElement.style.zIndex = '1'
+    
     if (this.config.shadowMapEnabled) {
       this.renderer.shadowMap.enabled = true
-      this.renderer.shadowMap.mapSize.width = this.config.shadowMapSize
-      this.renderer.shadowMap.mapSize.height = this.config.shadowMapSize
+      if (this.renderer.shadowMap.mapSize) {
+        this.renderer.shadowMap.mapSize.width = this.config.shadowMapSize
+        this.renderer.shadowMap.mapSize.height = this.config.shadowMapSize
+      }
     }
     
     // Add renderer to DOM
     if (document.body) {
       document.body.appendChild(this.renderer.domElement)
+      // Force initial render after DOM append
+      setTimeout(() => this.render(), 0)
     } else {
       // Wait for DOM to be ready
       if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', () => {
           document.body.appendChild(this.renderer.domElement)
+          // Force initial render after DOM append
+          setTimeout(() => this.render(), 0)
         })
       }
     }
@@ -130,14 +143,18 @@ export class GameRenderer {
     const dirLight = new DirectionalLight(0xffffff, 1.5)
     dirLight.position.set(200, -400, 500)
     dirLight.castShadow = true
-    dirLight.shadow.mapSize.width = this.config.shadowMapSize
-    dirLight.shadow.mapSize.height = this.config.shadowMapSize
-    dirLight.shadow.camera.left = -500
-    dirLight.shadow.camera.right = 500
-    dirLight.shadow.camera.top = 500
-    dirLight.shadow.camera.bottom = -500
-    dirLight.shadow.camera.near = 100
-    dirLight.shadow.camera.far = 1000
+    if (dirLight.shadow && dirLight.shadow.mapSize) {
+      dirLight.shadow.mapSize.width = this.config.shadowMapSize
+      dirLight.shadow.mapSize.height = this.config.shadowMapSize
+    }
+    if (dirLight.shadow && dirLight.shadow.camera) {
+      dirLight.shadow.camera.left = -500
+      dirLight.shadow.camera.right = 500
+      dirLight.shadow.camera.top = 500
+      dirLight.shadow.camera.bottom = -500
+      dirLight.shadow.camera.near = 100
+      dirLight.shadow.camera.far = 1000
+    }
     this.scene.add(dirLight)
     
     // Hemisphere light
@@ -164,18 +181,24 @@ export class GameRenderer {
    * Handle window resize
    */
   handleResize() {
+    if (!this.isInitialized) return
+    
     const { width } = this.cameraConfig
     const height = this.cameraConfig.height
     
     // Update camera
-    this.camera.left = width / -2
-    this.camera.right = width / 2
-    this.camera.top = height / 2
-    this.camera.bottom = height / -2
-    this.camera.updateProjectionMatrix()
+    if (this.camera) {
+      this.camera.left = width / -2
+      this.camera.right = width / 2
+      this.camera.top = height / 2
+      this.camera.bottom = height / -2
+      this.camera.updateProjectionMatrix()
+    }
     
     // Update renderer
-    this.renderer.setSize(window.innerWidth, window.innerHeight)
+    if (this.renderer) {
+      this.renderer.setSize(window.innerWidth, window.innerHeight)
+    }
     
     // Render frame immediately
     this.render()

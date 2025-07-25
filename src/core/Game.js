@@ -155,6 +155,12 @@ export class TrafficRunGame {
       // Reset game to initial state
       this.reset()
       
+      // Ensure score is positioned and visible
+      this.positionScoreElement()
+      
+      // Force initial render
+      this.renderer.render()
+      
       this.isInitialized = true
       this.logger.timeEnd('Game Initialization')
       this.logger.info('Game initialized successfully')
@@ -245,6 +251,9 @@ export class TrafficRunGame {
     
     // Update UI
     setScore('Press UP')
+    
+    // Position score element properly
+    this.positionScoreElement()
     
     // Clean up vehicles and explosions
     this.cleanupVehicles()
@@ -358,6 +367,21 @@ export class TrafficRunGame {
     if (laps !== this.state.score) {
       this.state.score = laps
       setScore(this.state.score)
+      
+      // Emit score update event
+      eventBus.emit(GameEvents.SCORE_UPDATE, { 
+        score: this.state.score, 
+        timestamp: Date.now() 
+      })
+      
+      if (laps > 0) {
+        eventBus.emit(GameEvents.SCORE_LAP_COMPLETE, { 
+          lapNumber: laps, 
+          timestamp: Date.now() 
+        })
+      }
+      
+      this.logger.debug(`Score updated: ${this.state.score} laps`)
     }
   }
   
@@ -394,15 +418,38 @@ export class TrafficRunGame {
    * Clean up all vehicles and explosions
    */
   cleanupVehicles() {
+    // Clean up other vehicles
     this.state.otherVehicles.forEach(vehicle => {
-      this.renderer.removeFromScene(vehicle.mesh)
-      vehicle.crashed = false
+      if (vehicle.mesh) {
+        this.renderer.removeFromScene(vehicle.mesh)
+        // Dispose geometry and materials to prevent memory leaks
+        if (vehicle.mesh.geometry) vehicle.mesh.geometry.dispose()
+        if (vehicle.mesh.material) {
+          if (Array.isArray(vehicle.mesh.material)) {
+            vehicle.mesh.material.forEach(mat => mat.dispose())
+          } else {
+            vehicle.mesh.material.dispose()
+          }
+        }
+      }
+      
       if (vehicle.explosionMesh) {
         this.renderer.removeFromScene(vehicle.explosionMesh)
+        if (vehicle.explosionMesh.geometry) vehicle.explosionMesh.geometry.dispose()
+        if (vehicle.explosionMesh.material) vehicle.explosionMesh.material.dispose()
         vehicle.explosionMesh = null
       }
+      
+      vehicle.crashed = false
     })
+    
+    // Clear the array
     this.state.otherVehicles = []
+    
+    // Force a render to update the scene
+    this.renderer.render()
+    
+    this.logger.debug('All vehicles cleaned up')
   }
   
   /**
@@ -435,7 +482,7 @@ export class TrafficRunGame {
   }
   
   /**
-   * Position score element based on camera
+   * Position score element based on camera (original positioning logic)
    */
   positionScoreElement() {
     const dimensions = this.renderer.getCameraDimensions()
