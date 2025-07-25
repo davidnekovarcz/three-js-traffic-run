@@ -4,47 +4,10 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite App</title>
-    <link rel="stylesheet" href="/src/style.css" />
+    <title>Traffic Run</title>
   </head>
   <body>
-    <script type="module" src="/src/main.js"></script>
-
-    <div id="score">Press UP</div>
-    <div id="controls">
-      <div id="buttons">
-        <button id="accelerate">
-          <svg width="30" height="30" viewBox="0 0 10 10">
-            <g transform="rotate(0, 5,5)">
-              <path d="M5,4 L7,6 L3,6 L5,4" />
-            </g>
-          </svg>
-        </button>
-        <button id="decelerate">
-          <svg width="30" height="30" viewBox="0 0 10 10">
-            <g transform="rotate(180, 5,5)">
-              <path d="M5,4 L7,6 L3,6 L5,4" />
-            </g>
-          </svg>
-        </button>
-      </div>
-      <div id="instructions">
-        Press UP to start. Avoid collision with other vehicles by accelerating
-        or decelerating with the UP and DOWN keys.
-      </div>
-    </div>
-
-    <div id="results">
-      <div class="content">
-        <h1>You hit another vehicle</h1>
-        <p>To reset the game press R</p>
-      </div>
-    </div>
-    <div id="pause-dialog" style="display:none; position: absolute; align-items: center; justify-content: center; height: 100%; width: 100%; background-color: rgba(20, 20, 20, 0.75); z-index: 52;">
-      <div class="content" style="max-width: 500px; padding: 50px; border-radius: 20px; text-align: center;">
-        <h1>Paused</h1>
-        <p>Press SPACE to resume</p>
-      </div>
-    </div>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
