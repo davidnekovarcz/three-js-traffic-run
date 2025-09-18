@@ -2,6 +2,7 @@ import { Audio, AudioLoader, AudioListener } from 'three';
 
 let carEngineSound: Audio | null = null;
 let carCrashSound: Audio | null = null;
+let backgroundMusic: Audio | null = null;
 let carCrashDefaultVolume: number = 0.7;
 
 export function initAudio(audioListener: AudioListener): void {
@@ -9,14 +10,26 @@ export function initAudio(audioListener: AudioListener): void {
 
   carEngineSound = new Audio(audioListener);
   carCrashSound = new Audio(audioListener);
+  backgroundMusic = new Audio(audioListener);
 
   audioLoader.load('/audio/car-start-iddle.wav', buffer => {
-    carEngineSound.setBuffer(buffer);
-    carEngineSound.setVolume(0.5);
+    if (carEngineSound) {
+      carEngineSound.setBuffer(buffer);
+      carEngineSound.setVolume(0.5);
+    }
   });
   audioLoader.load('/audio/car-crash.wav', buffer => {
-    carCrashSound.setBuffer(buffer);
-    carCrashSound.setVolume(carCrashDefaultVolume);
+    if (carCrashSound) {
+      carCrashSound.setBuffer(buffer);
+      carCrashSound.setVolume(carCrashDefaultVolume);
+    }
+  });
+  audioLoader.load('/audio/bg-music.mp3', buffer => {
+    if (backgroundMusic) {
+      backgroundMusic.setBuffer(buffer);
+      backgroundMusic.setLoop(true);
+      backgroundMusic.setVolume(0.2); // Lower volume for background music
+    }
   });
 }
 
@@ -54,4 +67,28 @@ export function playCarCrashQuiet(): void {
 
 export function stopCarCrash(): void {
   if (carCrashSound && carCrashSound.isPlaying) carCrashSound.stop();
+}
+
+export function playBackgroundMusic(): void {
+  if (backgroundMusic && backgroundMusic.buffer && !backgroundMusic.isPlaying) {
+    backgroundMusic.play();
+  }
+}
+
+export function stopBackgroundMusic(): void {
+  if (backgroundMusic && backgroundMusic.isPlaying) {
+    backgroundMusic.stop();
+  }
+}
+
+export function pauseBackgroundMusic(): void {
+  if (backgroundMusic && backgroundMusic.isPlaying) {
+    backgroundMusic.pause();
+  }
+}
+
+export function resumeBackgroundMusic(): void {
+  if (backgroundMusic && backgroundMusic.buffer && !backgroundMusic.isPlaying) {
+    backgroundMusic.play();
+  }
 }

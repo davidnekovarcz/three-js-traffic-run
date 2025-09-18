@@ -34,7 +34,7 @@ import {
   showPauseDialog,
   hidePauseDialog,
 } from './ui';
-import { initAudio } from './audio';
+import { initAudio, playBackgroundMusic, stopBackgroundMusic, pauseBackgroundMusic, resumeBackgroundMusic } from './audio';
 import { checkCollision } from './collision';
 import { vehicleColors } from './vehicles';
 import { GameState, VehicleType } from './types';
@@ -63,6 +63,8 @@ function pauseGame(): void {
     stopAnimationLoop();
     showPauseDialog();
     paused = true;
+    // Pause background music when game is paused
+    pauseBackgroundMusic();
   }
 }
 function resumeGame(): void {
@@ -71,6 +73,8 @@ function resumeGame(): void {
     lastTimestamp = undefined;
     setAnimationLoop(animation);
     paused = false;
+    // Resume background music when game is resumed
+    resumeBackgroundMusic();
   }
 }
 
@@ -130,6 +134,8 @@ function startGame() {
     setAnimationLoop(animation);
     gameOver = false;
     gameOverPending = false;
+    // Start background music when game starts
+    playBackgroundMusic();
   }
 }
 
@@ -171,6 +177,8 @@ function animation(timestamp: number): void {
     return;
   }
   if (gameOverPending) {
+    // Stop background music when game over is pending
+    stopBackgroundMusic();
     renderer.render(scene, camera);
     lastTimestamp = timestamp;
     return;
