@@ -66,7 +66,7 @@ This is a modern 2.5D racing game built with:
 
 ## 📁 Project Structure
 
-```text
+```bash
 traffic-run-three-js/
 ├── index.html          # Main HTML with UI elements
 ├── src/
@@ -91,60 +91,6 @@ traffic-run-three-js/
 └── !old/              # Original implementation backup
 ```
 
-## 🚀 Getting Started
-
-### Prerequisites
-
-- Node.js v22.17.0 (check `.nvmrc`)
-- npm or yarn package manager
-
-### Installation
-
-1. **Clone the repository**
-
-   ```bash
-   git clone <repository-url>
-   cd traffic-run-three-js
-   ```
-
-2. **Use correct Node version**
-
-   ```bash
-   nvm use
-   ```
-
-3. **Install dependencies**
-
-   ```bash
-   npm install
-   ```
-
-4. **Start development server**
-
-   ```bash
-   npm run dev
-   ```
-
-5. **Open browser**
-
-   Navigate to <http://localhost:5173/>
-
-
-## 🧪 Testing
-
-Multiple test pages are available in the `/test/` folder:
-
-- **`/test/final-test.html`** - Complete game test with UI
-- **`/test/browser-test.html`** - Step-by-step module loading test
-- **`/test/simple-game.html`** - Minimal game test
-
-## 📊 Project Stats
-
-- **Source Files**: 16 files
-- **Test Files**: 0 files
-- **Dependencies**: 1 packages
-- **Last Updated**: 7/25/2025
-
 ## 📝 Development Notes
 
 - Game uses procedural generation for vehicles and track textures
@@ -153,15 +99,6 @@ Multiple test pages are available in the `/test/` folder:
 - Modular architecture enables easier testing and maintenance
 - All new systems are integrated and working
 - Development server runs successfully with live reload
-
-## 🐛 Troubleshooting
-
-If you encounter issues:
-
-1. **Check Node version**: Run `nvm use` to ensure correct Node.js version
-2. **Clear cache**: Delete `node_modules` and run `npm install`
-3. **Check console**: Open browser dev tools for error messages
-4. **Test pages**: Use `/test/` pages for debugging specific issues
 
 ## 🤝 Contributing
 1. Fork the repository
