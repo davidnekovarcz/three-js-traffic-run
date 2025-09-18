@@ -9,11 +9,11 @@ export function initAudio(audioListener) {
   carEngineSound = new Audio(audioListener);
   carCrashSound = new Audio(audioListener);
 
-  audioLoader.load('src/audio/car-start-iddle.wav', buffer => {
+  audioLoader.load('/audio/car-start-iddle.wav', buffer => {
     carEngineSound.setBuffer(buffer);
     carEngineSound.setVolume(0.5);
   });
-  audioLoader.load('src/audio/car-crash.wav', buffer => {
+  audioLoader.load('/audio/car-crash.wav', buffer => {
     carCrashSound.setBuffer(buffer);
     carCrashSound.setVolume(carCrashDefaultVolume);
   });
