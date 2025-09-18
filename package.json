@@ -5,15 +5,28 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "tsc && vite build",
     "start": "node server.js",
     "preview": "vite preview",
+    "lint": "eslint src --ext .ts,.js --fix",
+    "lint:check": "eslint src --ext .ts,.js",
+    "format": "prettier --write src/**/*.{ts,js,json,css,md}",
+    "format:check": "prettier --check src/**/*.{ts,js,json,css,md}",
+    "type-check": "tsc --noEmit",
     "cypress:open": "cypress open",
     "cypress:run": "cypress run",
     "test:e2e": "cypress run",
     "test:e2e:dev": "cypress open"
   },
   "devDependencies": {
+    "@types/three": "^0.178.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.45.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-prettier": "^5.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.1.0",
     "vite": "^7.0.4"
   },
   "dependencies": {

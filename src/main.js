@@ -7,7 +7,7 @@ import {
   stopAnimationLoop,
   cameraWidth,
   cameraHeight,
-  audioListener // Import audioListener
+  audioListener
 } from './scene.js';
 import { Car, Truck, Tree, addVehicle, moveOtherVehicles, getVehicleSpeed, pickRandom } from './vehicles.js';
 import {
