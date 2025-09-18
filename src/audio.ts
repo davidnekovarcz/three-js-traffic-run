@@ -1,9 +1,10 @@
-import { Audio, AudioLoader } from 'three';
+import { Audio, AudioLoader, AudioListener } from 'three';
 
-let carEngineSound, carCrashSound;
-let carCrashDefaultVolume = 0.7;
+let carEngineSound: Audio | null = null;
+let carCrashSound: Audio | null = null;
+let carCrashDefaultVolume: number = 0.7;
 
-export function initAudio(audioListener) {
+export function initAudio(audioListener: AudioListener): void {
   const audioLoader = new AudioLoader();
 
   carEngineSound = new Audio(audioListener);
@@ -19,18 +20,18 @@ export function initAudio(audioListener) {
   });
 }
 
-export function playCarEngine() {
+export function playCarEngine(): void {
   if (carEngineSound && carEngineSound.buffer) {
     if (carEngineSound.isPlaying) carEngineSound.stop();
     carEngineSound.play();
   }
 }
 
-export function stopCarEngine() {
+export function stopCarEngine(): void {
   if (carEngineSound && carEngineSound.isPlaying) carEngineSound.stop();
 }
 
-export function playCarCrash() {
+export function playCarCrash(): void {
   if (carCrashSound && carCrashSound.buffer) {
     if (carCrashSound.isPlaying) carCrashSound.stop();
     carCrashSound.setVolume(carCrashDefaultVolume);
@@ -38,17 +39,19 @@ export function playCarCrash() {
   }
 }
 
-export function playCarCrashQuiet() {
+export function playCarCrashQuiet(): void {
   if (carCrashSound && carCrashSound.buffer) {
     if (carCrashSound.isPlaying) carCrashSound.stop();
     carCrashSound.setVolume(0.25);
     carCrashSound.play();
     setTimeout(() => {
-      carCrashSound.setVolume(carCrashDefaultVolume);
+      if (carCrashSound) {
+        carCrashSound.setVolume(carCrashDefaultVolume);
+      }
     }, 300); // restore after short time
   }
 }
 
-export function stopCarCrash() {
+export function stopCarCrash(): void {
   if (carCrashSound && carCrashSound.isPlaying) carCrashSound.stop();
 }

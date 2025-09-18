@@ -1,4 +1,5 @@
 import './style.css';
+import * as THREE from 'three';
 import {
   scene,
   camera,
@@ -8,7 +9,7 @@ import {
   cameraWidth,
   cameraHeight,
   audioListener,
-} from './scene.js';
+} from './scene';
 import {
   Car,
   Truck,
@@ -16,14 +17,14 @@ import {
   addVehicle,
   moveOtherVehicles,
   pickRandom,
-} from './vehicles.js';
+} from './vehicles';
 import {
   renderMap,
   trackRadius,
   arcCenterX,
   innerTrackRadius,
   outerTrackRadius,
-} from './track.js';
+} from './track';
 import {
   setScore,
   showResults,
@@ -32,38 +33,39 @@ import {
   setupUIHandlers,
   showPauseDialog,
   hidePauseDialog,
-} from './ui.js';
-import { initAudio } from './audio.js';
-import { checkCollision } from './collision.js';
-import { vehicleColors } from './vehicles.js';
+} from './ui';
+import { initAudio } from './audio';
+import { checkCollision } from './collision';
+import { vehicleColors } from './vehicles';
+import { GameState, VehicleType } from './types';
 
 // Game state
-let playerCar;
-let otherVehicles = [];
-let score = 0;
-let playerAngleMoved = 0;
-let accelerate = false;
-let decelerate = false;
-let ready = false;
-let lastTimestamp;
-let playerLane = 'inner'; // 'inner' or 'outer'
-let playerCarColor = null;
-const laneOffset = 20;
+let playerCar: THREE.Group | null = null;
+let otherVehicles: THREE.Group[] = [];
+let score: number = 0;
+let playerAngleMoved: number = 0;
+let accelerate: boolean = false;
+let decelerate: boolean = false;
+let ready: boolean = false;
+let lastTimestamp: number | null = null;
+let playerLane: 'inner' | 'outer' = 'inner';
+let playerCarColor: string | null = null;
+const laneOffset: number = 20;
 
-const speed = 0.0017;
-const playerAngleInitial = Math.PI;
-let paused = false;
-let gameOver = false;
-let gameOverPending = false;
+const speed: number = 0.0017;
+const playerAngleInitial: number = Math.PI;
+let paused: boolean = false;
+let gameOver: boolean = false;
+let gameOverPending: boolean = false;
 
-function pauseGame() {
+function pauseGame(): void {
   if (!paused && !gameOver) {
     stopAnimationLoop();
     showPauseDialog();
     paused = true;
   }
 }
-function resumeGame() {
+function resumeGame(): void {
   if (paused && !gameOver) {
     hidePauseDialog();
     lastTimestamp = undefined;
@@ -72,7 +74,7 @@ function resumeGame() {
   }
 }
 
-function reset() {
+function reset(): void {
   playerAngleMoved = 0;
   score = 0;
   setScore('Press UP');
@@ -163,7 +165,7 @@ function switchLane(direction) {
   }
 }
 
-function animation(timestamp) {
+function animation(timestamp: number): void {
   if (!lastTimestamp) {
     lastTimestamp = timestamp;
     return;
