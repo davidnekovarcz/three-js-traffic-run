@@ -1,8 +1,20 @@
 {
   "name": "traffic-run-three-js",
-  "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "description": "Traffic Run - 2.5D Racing Game",
+  "author": "https://github.com/davidnekovarcz",
+  "license": "MIT",
   "type": "module",
+  "keywords": [
+    "traffic-run",
+    "racing",
+    "game",
+    "2d",
+    "r3f",
+    "three-js",
+    "typescript",
+    "cypress"
+  ],
   "scripts": {
     "dev": "vite",
     "build": "vite build",

@@ -1,6 +1,6 @@
-# Traffic Run - 3D Racing Game
+# Traffic Run - 2.5D Racing Game
 
-A thrilling 3D racing/dodging game built with Three.js where you navigate a figure-8 track, avoid AI vehicles, and complete as many laps as possible!
+A thrilling 2.5D racing/dodging game built with Three.js where you navigate a figure-8 track, avoid AI vehicles, and complete as many laps as possible!
 
 ## 🎮 How to Play
 
@@ -47,8 +47,8 @@ A thrilling 3D racing/dodging game built with Three.js where you navigate a figu
 
 ## 🛠️ Technical Details
 
-This is a modern 3D racing game built with:
-- **Three.js** for 3D graphics and rendering
+This is a modern 2.5D racing game built with:
+- **Three.js** for 2.5D graphics and rendering
 - **Vite** for fast development and building
 - **Modular architecture** with clean separation of concerns
 - **Event-driven system** for component communication
@@ -164,9 +164,11 @@ If you encounter issues:
 4. **Test pages**: Use `/test/` pages for debugging specific issues
 
 ## 🤝 Contributing
-
-The codebase is now fully refactored with modern architecture while maintaining exact same functionality. Feel free to extend the new systems or add features using the established patterns.
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
 
 ## 📄 License
-
-See LICENSE.txt for details.
+This project is licensed under the MIT License - see the LICENSE file for details.
