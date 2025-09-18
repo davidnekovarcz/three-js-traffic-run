@@ -58,6 +58,27 @@ let paused: boolean = false;
 let gameOver: boolean = false;
 let gameOverPending: boolean = false;
 
+// Timeout management
+let activeTimeouts: number[] = [];
+
+function clearAllTimeouts(): void {
+  activeTimeouts.forEach(timeoutId => clearTimeout(timeoutId));
+  activeTimeouts = [];
+}
+
+function addTimeout(callback: () => void, delay: number): number {
+  const timeoutId = setTimeout(() => {
+    activeTimeouts = activeTimeouts.filter(id => id !== timeoutId);
+    callback();
+  }, delay);
+  activeTimeouts.push(timeoutId);
+  return timeoutId;
+}
+
+// Make timeout management functions available globally for collision.ts
+(window as any).addTimeout = addTimeout;
+(window as any).clearAllTimeouts = clearAllTimeouts;
+
 function pauseGame(): void {
   if (!paused && !gameOver) {
     stopAnimationLoop();
@@ -79,6 +100,9 @@ function resumeGame(): void {
 }
 
 function reset(): void {
+  // Clear all active timeouts to prevent state inconsistencies
+  clearAllTimeouts();
+  
   playerAngleMoved = 0;
   score = 0;
   setScore('Press UP');
@@ -264,6 +288,15 @@ window.addEventListener('resize', () => {
   renderer.render(scene, camera);
 });
 
+// Auto-pause when window becomes inactive
+window.addEventListener('visibilitychange', () => {
+  if (document.hidden && !paused && !gameOver && ready) {
+    pauseGame();
+  } else if (!document.hidden && paused && !gameOver && ready) {
+    resumeGame();
+  }
+});
+
 // Game initialization
 function init() {
   // Pick a random color for the player
@@ -286,6 +319,11 @@ init();
 window.addEventListener('keydown', event => {
   if (event.key === ' ') {
     event.preventDefault();
+    if (gameOver) {
+      // During game over, space key should restart the game
+      reset();
+      return;
+    }
     if (paused) {
       resumeGame();
     } else {

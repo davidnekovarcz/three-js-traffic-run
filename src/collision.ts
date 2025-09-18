@@ -68,15 +68,29 @@ function destroyVehicle(vehicle, scene, otherVehicles, isPlayer = false) {
   };
   grow();
   if (!isPlayer) {
-    setTimeout(() => {
-      scene.remove(vehicle.mesh);
-      if (vehicle.explosionMesh) {
-        scene.remove(vehicle.explosionMesh);
-        vehicle.explosionMesh = null;
-      }
-      const idx = otherVehicles.indexOf(vehicle);
-      if (idx !== -1) otherVehicles.splice(idx, 1);
-    }, 2000);
+    // Use a managed timeout that can be cleared on game reset
+    if (typeof window !== 'undefined' && (window as any).addTimeout) {
+      (window as any).addTimeout(() => {
+        scene.remove(vehicle.mesh);
+        if (vehicle.explosionMesh) {
+          scene.remove(vehicle.explosionMesh);
+          vehicle.explosionMesh = null;
+        }
+        const idx = otherVehicles.indexOf(vehicle);
+        if (idx !== -1) otherVehicles.splice(idx, 1);
+      }, 2000);
+    } else {
+      // Fallback to regular setTimeout if timeout management not available
+      setTimeout(() => {
+        scene.remove(vehicle.mesh);
+        if (vehicle.explosionMesh) {
+          scene.remove(vehicle.explosionMesh);
+          vehicle.explosionMesh = null;
+        }
+        const idx = otherVehicles.indexOf(vehicle);
+        if (idx !== -1) otherVehicles.splice(idx, 1);
+      }, 2000);
+    }
   }
 }
 
@@ -172,10 +186,19 @@ export function checkCollision({
     destroyVehicle({ mesh: playerCar, crashed: false }, scene, [], true);
     playCarCrash();
     stopCarEngine();
-    setTimeout(() => {
-      showResults(true);
-      stopAnimationLoop();
-    }, 1000); // Delay game over by 1s for animation
+    // Use managed timeout for game over delay
+    if (typeof window !== 'undefined' && (window as any).addTimeout) {
+      (window as any).addTimeout(() => {
+        showResults(true);
+        stopAnimationLoop();
+      }, 1000); // Delay game over by 1s for animation
+    } else {
+      // Fallback to regular setTimeout
+      setTimeout(() => {
+        showResults(true);
+        stopAnimationLoop();
+      }, 1000);
+    }
     return true;
   }
   // Car-to-car collisions in the same lane (skip vehicles involved in player collision)
