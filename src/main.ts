@@ -80,7 +80,7 @@ function addTimeout(callback: () => void, delay: number): number {
 (window as any).clearAllTimeouts = clearAllTimeouts;
 
 function pauseGame(): void {
-  if (!paused && !gameOver) {
+  if (!paused && !gameOver && !gameOverPending) {
     stopAnimationLoop();
     showPauseDialog();
     paused = true;
@@ -89,7 +89,7 @@ function pauseGame(): void {
   }
 }
 function resumeGame(): void {
-  if (paused && !gameOver) {
+  if (paused && !gameOver && !gameOverPending) {
     hidePauseDialog();
     lastTimestamp = undefined;
     setAnimationLoop(animation);
@@ -147,6 +147,8 @@ function reset(): void {
   ready = true;
   gameOver = false;
   gameOverPending = false;
+  // Resume background music after reset
+  resumeBackgroundMusic();
 }
 
 function startGame() {
@@ -158,8 +160,8 @@ function startGame() {
     setAnimationLoop(animation);
     gameOver = false;
     gameOverPending = false;
-    // Start background music when game starts
-    playBackgroundMusic();
+    // Resume background music if it was paused
+    resumeBackgroundMusic();
   }
 }
 
@@ -255,26 +257,36 @@ function positionScoreElement() {
 // UI event wiring
 setupUIHandlers({
   onAccelerateDown: val => {
-    if (!paused) accelerate = val;
+    if (!paused && !gameOver && !gameOverPending) accelerate = val;
   },
   onDecelerateDown: val => {
-    if (!paused) decelerate = val;
+    if (!paused && !gameOver && !gameOverPending) decelerate = val;
   },
   onResetKey: reset,
   onStartKey: () => {
-    if (paused) resumeGame();
-    else startGame();
+    if (gameOver || gameOverPending) {
+      reset();
+    } else if (paused) {
+      resumeGame();
+    } else {
+      startGame();
+    }
   },
   onLeftKey: () => {
-    if (!paused) playerLane = 'outer';
+    if (!paused && !gameOver && !gameOverPending) playerLane = 'outer';
   },
   onRightKey: () => {
-    if (!paused) playerLane = 'inner';
+    if (!paused && !gameOver && !gameOverPending) playerLane = 'inner';
   },
 });
 
 // Initialize audio
 initAudio(audioListener);
+
+// Start background music on page load
+setTimeout(() => {
+  playBackgroundMusic();
+}, 1000); // Small delay to ensure audio is loaded
 
 // Responsive
 window.addEventListener('resize', () => {
@@ -290,9 +302,9 @@ window.addEventListener('resize', () => {
 
 // Auto-pause when window becomes inactive
 window.addEventListener('visibilitychange', () => {
-  if (document.hidden && !paused && !gameOver && ready) {
+  if (document.hidden && !paused && !gameOver && !gameOverPending && ready) {
     pauseGame();
-  } else if (!document.hidden && paused && !gameOver && ready) {
+  } else if (!document.hidden && paused && !gameOver && !gameOverPending && ready) {
     resumeGame();
   }
 });
