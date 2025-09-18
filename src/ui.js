@@ -1,10 +1,8 @@
 // UI element references
-const scoreElement = document.getElementById("score");
-const buttonsElement = document.getElementById("buttons");
-const instructionsElement = document.getElementById("instructions");
-const resultsElement = document.getElementById("results");
-const accelerateButton = document.getElementById("accelerate");
-const decelerateButton = document.getElementById("decelerate");
+const scoreElement = document.getElementById('score');
+const buttonsElement = document.getElementById('buttons');
+const instructionsElement = document.getElementById('instructions');
+const resultsElement = document.getElementById('results');
 const pauseDialogElement = document.getElementById('pause-dialog');
 
 // Create arrow buttons
@@ -71,7 +69,7 @@ function setScore(value) {
   if (scoreElement) scoreElement.innerText = value;
 }
 function showResults(show) {
-  if (resultsElement) resultsElement.style.display = show ? "flex" : "none";
+  if (resultsElement) resultsElement.style.display = show ? 'flex' : 'none';
 }
 function setInstructionsOpacity(opacity) {
   if (instructionsElement) instructionsElement.style.opacity = opacity;
@@ -85,41 +83,89 @@ function showPauseDialog() {
 function hidePauseDialog() {
   if (pauseDialogElement) pauseDialogElement.style.display = 'none';
 }
-function setupUIHandlers({ onAccelerateDown, onAccelerateUp, onDecelerateDown, onDecelerateUp, onResetKey, onStartKey, onLeftKey, onRightKey }) {
+function setupUIHandlers({
+  onAccelerateDown,
+  onDecelerateDown,
+  onResetKey,
+  onStartKey,
+  onLeftKey,
+  onRightKey,
+}) {
   onAccelerate = onAccelerateDown;
   onDecelerate = onDecelerateDown;
   onReset = onResetKey;
   onStart = onStartKey;
   if (upButton) {
-    upButton.addEventListener("mousedown", () => { if (onStart) onStart(); if (onAccelerate) onAccelerate(true); });
-    upButton.addEventListener("mouseup", () => { if (onAccelerate) onAccelerate(false); });
-    upButton.addEventListener("touchstart", () => { if (onStart) onStart(); if (onAccelerate) onAccelerate(true); });
-    upButton.addEventListener("touchend", () => { if (onAccelerate) onAccelerate(false); });
+    upButton.addEventListener('mousedown', () => {
+      if (onStart) onStart();
+      if (onAccelerate) onAccelerate(true);
+    });
+    upButton.addEventListener('mouseup', () => {
+      if (onAccelerate) onAccelerate(false);
+    });
+    upButton.addEventListener('touchstart', () => {
+      if (onStart) onStart();
+      if (onAccelerate) onAccelerate(true);
+    });
+    upButton.addEventListener('touchend', () => {
+      if (onAccelerate) onAccelerate(false);
+    });
   }
   if (downButton) {
-    downButton.addEventListener("mousedown", () => { if (onDecelerate) onDecelerate(true); });
-    downButton.addEventListener("mouseup", () => { if (onDecelerate) onDecelerate(false); });
-    downButton.addEventListener("touchstart", () => { if (onDecelerate) onDecelerate(true); });
-    downButton.addEventListener("touchend", () => { if (onDecelerate) onDecelerate(false); });
+    downButton.addEventListener('mousedown', () => {
+      if (onDecelerate) onDecelerate(true);
+    });
+    downButton.addEventListener('mouseup', () => {
+      if (onDecelerate) onDecelerate(false);
+    });
+    downButton.addEventListener('touchstart', () => {
+      if (onDecelerate) onDecelerate(true);
+    });
+    downButton.addEventListener('touchend', () => {
+      if (onDecelerate) onDecelerate(false);
+    });
   }
   if (leftButton) {
-    leftButton.addEventListener('mousedown', () => { if (onLeftKey) onLeftKey(); });
-    leftButton.addEventListener('touchstart', () => { if (onLeftKey) onLeftKey(); });
+    leftButton.addEventListener('mousedown', () => {
+      if (onLeftKey) onLeftKey();
+    });
+    leftButton.addEventListener('touchstart', () => {
+      if (onLeftKey) onLeftKey();
+    });
   }
   if (rightButton) {
-    rightButton.addEventListener('mousedown', () => { if (onRightKey) onRightKey(); });
-    rightButton.addEventListener('touchstart', () => { if (onRightKey) onRightKey(); });
+    rightButton.addEventListener('mousedown', () => {
+      if (onRightKey) onRightKey();
+    });
+    rightButton.addEventListener('touchstart', () => {
+      if (onRightKey) onRightKey();
+    });
   }
-  window.addEventListener("keydown", (event) => {
-    if (event.key === "ArrowUp") { if (onStart) onStart(); if (onAccelerate) onAccelerate(true); }
-    if (event.key === "ArrowDown") { if (onDecelerate) onDecelerate(true); }
-    if (event.key === "ArrowLeft") { if (onLeftKey) onLeftKey(); }
-    if (event.key === "ArrowRight") { if (onRightKey) onRightKey(); }
-    if (event.key === "R" || event.key === "r") { if (onReset) onReset(); }
+  window.addEventListener('keydown', event => {
+    if (event.key === 'ArrowUp') {
+      if (onStart) onStart();
+      if (onAccelerate) onAccelerate(true);
+    }
+    if (event.key === 'ArrowDown') {
+      if (onDecelerate) onDecelerate(true);
+    }
+    if (event.key === 'ArrowLeft') {
+      if (onLeftKey) onLeftKey();
+    }
+    if (event.key === 'ArrowRight') {
+      if (onRightKey) onRightKey();
+    }
+    if (event.key === 'R' || event.key === 'r') {
+      if (onReset) onReset();
+    }
   });
-  window.addEventListener("keyup", (event) => {
-    if (event.key === "ArrowUp") { if (onAccelerate) onAccelerate(false); }
-    if (event.key === "ArrowDown") { if (onDecelerate) onDecelerate(false); }
+  window.addEventListener('keyup', event => {
+    if (event.key === 'ArrowUp') {
+      if (onAccelerate) onAccelerate(false);
+    }
+    if (event.key === 'ArrowDown') {
+      if (onDecelerate) onDecelerate(false);
+    }
   });
 }
 
@@ -134,5 +180,5 @@ export {
   instructionsElement,
   resultsElement,
   showPauseDialog,
-  hidePauseDialog
-}; 
+  hidePauseDialog,
+};

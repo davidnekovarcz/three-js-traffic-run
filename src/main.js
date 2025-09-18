@@ -7,15 +7,22 @@ import {
   stopAnimationLoop,
   cameraWidth,
   cameraHeight,
-  audioListener
+  audioListener,
 } from './scene.js';
-import { Car, Truck, Tree, addVehicle, moveOtherVehicles, getVehicleSpeed, pickRandom } from './vehicles.js';
+import {
+  Car,
+  Truck,
+  Tree,
+  addVehicle,
+  moveOtherVehicles,
+  pickRandom,
+} from './vehicles.js';
 import {
   renderMap,
   trackRadius,
   arcCenterX,
   innerTrackRadius,
-  outerTrackRadius
+  outerTrackRadius,
 } from './track.js';
 import {
   setScore,
@@ -24,11 +31,9 @@ import {
   setButtonsOpacity,
   setupUIHandlers,
   showPauseDialog,
-  hidePauseDialog
+  hidePauseDialog,
 } from './ui.js';
-import {
-  initAudio
-} from './audio.js';
+import { initAudio } from './audio.js';
 import { checkCollision } from './collision.js';
 import { vehicleColors } from './vehicles.js';
 
@@ -48,7 +53,6 @@ const laneOffset = 20;
 const speed = 0.0017;
 const playerAngleInitial = Math.PI;
 let paused = false;
-let pauseRequested = false;
 let gameOver = false;
 let gameOverPending = false;
 
@@ -91,7 +95,11 @@ function reset() {
   if (playerCar) {
     playerCar.traverse(child => {
       if (child.material) {
-        if (child.material.color && child.material.userData && child.material.userData.originalColor) {
+        if (
+          child.material.color &&
+          child.material.userData &&
+          child.material.userData.originalColor
+        ) {
           child.material.color.copy(child.material.userData.originalColor);
         } else if (child.material.color) {
           // Save original color if not already saved
@@ -124,7 +132,9 @@ function startGame() {
 }
 
 function getPlayerLaneRadius() {
-  return playerLane === 'inner' ? (innerTrackRadius + laneOffset) : (outerTrackRadius - laneOffset);
+  return playerLane === 'inner'
+    ? innerTrackRadius + laneOffset
+    : outerTrackRadius - laneOffset;
 }
 
 function movePlayerCar(timeDelta) {
@@ -171,7 +181,15 @@ function animation(timestamp) {
     setScore(score);
   }
   // Change: spawn a new car after every 3 laps (not 5)
-  if (otherVehicles.length < (laps + 1) / 3) addVehicle(scene, otherVehicles, Car, Truck, playerCarColor, playerAngleInitial + playerAngleMoved);
+  if (otherVehicles.length < (laps + 1) / 3)
+    addVehicle(
+      scene,
+      otherVehicles,
+      Car,
+      Truck,
+      playerCarColor,
+      playerAngleInitial + playerAngleMoved
+    );
   moveOtherVehicles(otherVehicles, speed, timeDelta, trackRadius, arcCenterX);
   const hit = checkCollision({
     playerCar,
@@ -180,7 +198,7 @@ function animation(timestamp) {
     otherVehicles,
     showResults,
     stopAnimationLoop,
-    scene // Pass scene for explosions
+    scene, // Pass scene for explosions
   });
   if (hit) {
     gameOverPending = true;
@@ -202,12 +220,23 @@ function positionScoreElement() {
 
 // UI event wiring
 setupUIHandlers({
-  onAccelerateDown: (val) => { if (!paused) accelerate = val; },
-  onDecelerateDown: (val) => { if (!paused) decelerate = val; },
+  onAccelerateDown: val => {
+    if (!paused) accelerate = val;
+  },
+  onDecelerateDown: val => {
+    if (!paused) decelerate = val;
+  },
   onResetKey: reset,
-  onStartKey: () => { if (paused) resumeGame(); else startGame(); },
-  onLeftKey: () => { if (!paused) playerLane = 'outer'; },
-  onRightKey: () => { if (!paused) playerLane = 'inner'; }
+  onStartKey: () => {
+    if (paused) resumeGame();
+    else startGame();
+  },
+  onLeftKey: () => {
+    if (!paused) playerLane = 'outer';
+  },
+  onRightKey: () => {
+    if (!paused) playerLane = 'inner';
+  },
 });
 
 // Initialize audio
@@ -231,13 +260,20 @@ function init() {
   playerCarColor = pickRandom(vehicleColors);
   playerCar = Car([playerCarColor]);
   scene.add(playerCar);
-  renderMap(scene, cameraWidth, cameraHeight * 2, { curbs: true, trees: true }, positionScoreElement, Tree);
+  renderMap(
+    scene,
+    cameraWidth,
+    cameraHeight * 2,
+    { curbs: true, trees: true },
+    positionScoreElement,
+    Tree
+  );
   reset();
 }
 
 init();
 
-window.addEventListener('keydown', (event) => {
+window.addEventListener('keydown', event => {
   if (event.key === ' ') {
     event.preventDefault();
     if (paused) {

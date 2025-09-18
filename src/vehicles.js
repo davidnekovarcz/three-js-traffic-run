@@ -6,18 +6,13 @@ import {
   SphereGeometry,
   Group,
   Vector2,
-  CanvasTexture
+  CanvasTexture,
 } from 'three';
 import { playCarEngine } from './audio.js';
 import { innerTrackRadius, outerTrackRadius, arcCenterX } from './track.js';
 
 // Vehicle colors and materials
-const vehicleColors = [
-  0xa52523,
-  0xef2d56,
-  0x0ad3ff,
-  0xff9f1c
-];
+const vehicleColors = [0xa52523, 0xef2d56, 0x0ad3ff, 0xff9f1c];
 const treeCrownColor = 0x498c2c;
 const treeTrunkColor = 0x4b3f2f;
 const wheelGeometry = new BoxGeometry(12, 33, 12);
@@ -82,7 +77,10 @@ function getTruckSideTexture() {
 function Car(availableColors = vehicleColors) {
   const car = new Group();
   const color = pickRandom(availableColors);
-  const main = new Mesh(new BoxGeometry(60, 30, 15), new MeshLambertMaterial({ color }));
+  const main = new Mesh(
+    new BoxGeometry(60, 30, 15),
+    new MeshLambertMaterial({ color })
+  );
   main.position.z = 12;
   main.castShadow = true;
   main.receiveShadow = true;
@@ -102,7 +100,7 @@ function Car(availableColors = vehicleColors) {
     new MeshLambertMaterial({ map: carLeftSideTexture }),
     new MeshLambertMaterial({ map: carRightSideTexture }),
     new MeshLambertMaterial({ color: 0xffffff }),
-    new MeshLambertMaterial({ color: 0xffffff })
+    new MeshLambertMaterial({ color: 0xffffff }),
   ]);
   cabin.position.x = -6;
   cabin.position.z = 25.5;
@@ -120,10 +118,16 @@ function Car(availableColors = vehicleColors) {
 function Truck(availableColors = vehicleColors) {
   const truck = new Group();
   const color = pickRandom(availableColors);
-  const base = new Mesh(new BoxGeometry(100, 25, 5), new MeshLambertMaterial({ color: 0xb4c6fc }));
+  const base = new Mesh(
+    new BoxGeometry(100, 25, 5),
+    new MeshLambertMaterial({ color: 0xb4c6fc })
+  );
   base.position.z = 10;
   truck.add(base);
-  const cargo = new Mesh(new BoxGeometry(75, 35, 40), new MeshLambertMaterial({ color: 0xffffff }));
+  const cargo = new Mesh(
+    new BoxGeometry(75, 35, 40),
+    new MeshLambertMaterial({ color: 0xffffff })
+  );
   cargo.position.x = -15;
   cargo.position.z = 30;
   cargo.castShadow = true;
@@ -141,7 +145,7 @@ function Truck(availableColors = vehicleColors) {
     new MeshLambertMaterial({ color, map: truckLeftTexture }),
     new MeshLambertMaterial({ color, map: truckRightTexture }),
     new MeshLambertMaterial({ color }),
-    new MeshLambertMaterial({ color })
+    new MeshLambertMaterial({ color }),
   ]);
   cabin.position.x = 40;
   cabin.position.z = 20;
@@ -211,7 +215,14 @@ function getVehicleSpeed(type) {
 }
 
 // playerAngle is required for safe spawn
-function addVehicle(scene, otherVehicles, Car, Truck, playerCarColor, playerAngle) {
+function addVehicle(
+  scene,
+  otherVehicles,
+  Car,
+  Truck,
+  playerCarColor,
+  playerAngle
+) {
   // Exclude player color from vehicleColors
   let availableColors = vehicleColors.slice();
   if (playerCarColor !== null) {
@@ -222,13 +233,15 @@ function addVehicle(scene, otherVehicles, Car, Truck, playerCarColor, playerAngl
   const vehicleSpeed = getVehicleSpeed(type);
   const clockwise = Math.random() >= 0.5;
   const laneOffset = 20;
-  const radius = clockwise ? (innerTrackRadius + laneOffset) : (outerTrackRadius - laneOffset);
+  const radius = clockwise
+    ? innerTrackRadius + laneOffset
+    : outerTrackRadius - laneOffset;
   let angle, mesh, collision, safe;
   // Always spawn on far side, at least 2 radians away from player
   for (let attempt = 0; attempt < 10; ++attempt) {
     // Far side: playerAngle + PI, plus some randomization
     const baseAngle = (playerAngle !== undefined ? playerAngle : 0) + Math.PI;
-    angle = baseAngle + (Math.random() - 0.5) * Math.PI / 2; // +/- 45deg
+    angle = baseAngle + ((Math.random() - 0.5) * Math.PI) / 2; // +/- 45deg
     // Use availableColors for this car/truck
     mesh = (type === 'car' ? Car : Truck)(availableColors);
     // Compute spawn position
@@ -239,7 +252,9 @@ function addVehicle(scene, otherVehicles, Car, Truck, playerCarColor, playerAngl
     // Ensure not too close to player or other vehicles
     safe = true;
     if (playerAngle !== undefined) {
-      const dAngle = Math.abs(Math.atan2(Math.sin(angle - playerAngle), Math.cos(angle - playerAngle)));
+      const dAngle = Math.abs(
+        Math.atan2(Math.sin(angle - playerAngle), Math.cos(angle - playerAngle))
+      );
       if (dAngle < 2.0) safe = false; // at least 2 radians away
     }
     collision = otherVehicles.some(v => {
@@ -251,11 +266,24 @@ function addVehicle(scene, otherVehicles, Car, Truck, playerCarColor, playerAngl
     if (!collision && safe) break;
   }
   scene.add(mesh);
-  otherVehicles.push({ mesh, type, speed: vehicleSpeed, clockwise, angle, radius });
+  otherVehicles.push({
+    mesh,
+    type,
+    speed: vehicleSpeed,
+    clockwise,
+    angle,
+    radius,
+  });
   playCarEngine();
 }
 
-function moveOtherVehicles(otherVehicles, speed, timeDelta, _trackRadius, arcCenterX) {
+function moveOtherVehicles(
+  otherVehicles,
+  speed,
+  timeDelta,
+  _trackRadius,
+  arcCenterX
+) {
   otherVehicles.forEach(vehicle => {
     if (vehicle.crashed) return; // Stop moving if crashed
     if (vehicle.clockwise) {
@@ -266,11 +294,23 @@ function moveOtherVehicles(otherVehicles, speed, timeDelta, _trackRadius, arcCen
     // Use each vehicle's assigned radius
     const vehicleX = Math.cos(vehicle.angle) * vehicle.radius + arcCenterX;
     const vehicleY = Math.sin(vehicle.angle) * vehicle.radius;
-    const rotation = vehicle.angle + (vehicle.clockwise ? -Math.PI / 2 : Math.PI / 2);
+    const rotation =
+      vehicle.angle + (vehicle.clockwise ? -Math.PI / 2 : Math.PI / 2);
     vehicle.mesh.position.x = vehicleX;
     vehicle.mesh.position.y = vehicleY;
     vehicle.mesh.rotation.z = rotation;
   });
 }
 
-export { Car, Truck, Wheel, HitZone, Tree, pickRandom, getVehicleSpeed, addVehicle, moveOtherVehicles, vehicleColors }; 
+export {
+  Car,
+  Truck,
+  Wheel,
+  HitZone,
+  Tree,
+  pickRandom,
+  getVehicleSpeed,
+  addVehicle,
+  moveOtherVehicles,
+  vehicleColors,
+};

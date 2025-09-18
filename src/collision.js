@@ -5,7 +5,7 @@ function getHitZonePosition(center, angle, clockwise, distance) {
   const directionAngle = angle + (clockwise ? -Math.PI / 2 : +Math.PI / 2);
   return {
     x: center.x + Math.cos(directionAngle) * distance,
-    y: center.y + Math.sin(directionAngle) * distance
+    y: center.y + Math.sin(directionAngle) * distance,
   };
 }
 
@@ -45,7 +45,11 @@ function destroyVehicle(vehicle, scene, otherVehicles, isPlayer = false) {
   // Explosion: add a growing sphere
   const explosion = new THREE.Mesh(
     new THREE.SphereGeometry(20, 16, 16),
-    new THREE.MeshBasicMaterial({ color: 0xffaa00, transparent: true, opacity: 0.8 })
+    new THREE.MeshBasicMaterial({
+      color: 0xffaa00,
+      transparent: true,
+      opacity: 0.8,
+    })
   );
   explosion.position.copy(vehicle.mesh.position);
   scene.add(explosion);
@@ -93,7 +97,7 @@ export function checkCollision({
   otherVehicles,
   showResults,
   stopAnimationLoop,
-  scene // Pass scene for explosion
+  scene, // Pass scene for explosion
 }) {
   // Track vehicles involved in player collision
   const playerCollidedVehicles = new Set();
@@ -115,16 +119,41 @@ export function checkCollision({
     if (vehicle.crashed) return;
     let vehicleHit = false;
     if (vehicle.type === 'car') {
-      const vehicleHitZone1 = getHitZonePosition(vehicle.mesh.position, vehicle.angle, vehicle.clockwise, 15);
-      const vehicleHitZone2 = getHitZonePosition(vehicle.mesh.position, vehicle.angle, vehicle.clockwise, -15);
+      const vehicleHitZone1 = getHitZonePosition(
+        vehicle.mesh.position,
+        vehicle.angle,
+        vehicle.clockwise,
+        15
+      );
+      const vehicleHitZone2 = getHitZonePosition(
+        vehicle.mesh.position,
+        vehicle.angle,
+        vehicle.clockwise,
+        -15
+      );
       if (getDistance(playerHitZone1, vehicleHitZone1) < 40) vehicleHit = true;
       if (getDistance(playerHitZone1, vehicleHitZone2) < 40) vehicleHit = true;
       if (getDistance(playerHitZone2, vehicleHitZone1) < 40) vehicleHit = true;
     }
     if (vehicle.type === 'truck') {
-      const vehicleHitZone1 = getHitZonePosition(vehicle.mesh.position, vehicle.angle, vehicle.clockwise, 35);
-      const vehicleHitZone2 = getHitZonePosition(vehicle.mesh.position, vehicle.angle, vehicle.clockwise, 0);
-      const vehicleHitZone3 = getHitZonePosition(vehicle.mesh.position, vehicle.angle, vehicle.clockwise, -35);
+      const vehicleHitZone1 = getHitZonePosition(
+        vehicle.mesh.position,
+        vehicle.angle,
+        vehicle.clockwise,
+        35
+      );
+      const vehicleHitZone2 = getHitZonePosition(
+        vehicle.mesh.position,
+        vehicle.angle,
+        vehicle.clockwise,
+        0
+      );
+      const vehicleHitZone3 = getHitZonePosition(
+        vehicle.mesh.position,
+        vehicle.angle,
+        vehicle.clockwise,
+        -35
+      );
       if (getDistance(playerHitZone1, vehicleHitZone1) < 40) vehicleHit = true;
       if (getDistance(playerHitZone1, vehicleHitZone2) < 40) vehicleHit = true;
       if (getDistance(playerHitZone1, vehicleHitZone3) < 40) vehicleHit = true;
@@ -154,7 +183,8 @@ export function checkCollision({
     for (let j = i + 1; j < otherVehicles.length; ++j) {
       const v1 = otherVehicles[i];
       const v2 = otherVehicles[j];
-      if (playerCollidedVehicles.has(v1) || playerCollidedVehicles.has(v2)) continue;
+      if (playerCollidedVehicles.has(v1) || playerCollidedVehicles.has(v2))
+        continue;
       if (vehiclesCollide(v1, v2)) {
         destroyVehicle(v1, scene, otherVehicles);
         destroyVehicle(v2, scene, otherVehicles);
@@ -162,4 +192,4 @@ export function checkCollision({
     }
   }
   return false;
-} 
+}

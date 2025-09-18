@@ -51,4 +51,4 @@ export function playCarCrashQuiet() {
 
 export function stopCarCrash() {
   if (carCrashSound && carCrashSound.isPlaying) carCrashSound.stop();
-} 
+}

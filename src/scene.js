@@ -6,7 +6,7 @@ import {
   DirectionalLight,
   GridHelper,
   HemisphereLight,
-  AudioListener
+  AudioListener,
 } from 'three';
 
 // Scene setup
@@ -33,7 +33,7 @@ const scene = new Scene();
 
 const renderer = new WebGLRenderer({
   antialias: true,
-  powerPreference: 'high-performance'
+  powerPreference: 'high-performance',
 });
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
@@ -66,9 +66,7 @@ function addGridHelper() {
 }
 
 // Animation loop control
-let animationCallback = null;
 function setAnimationLoop(cb) {
-  animationCallback = cb;
   renderer.setAnimationLoop(cb);
 }
 function stopAnimationLoop() {
@@ -84,5 +82,5 @@ export {
   addGridHelper,
   cameraWidth,
   cameraHeight,
-  audioListener
-}; 
+  audioListener,
+};

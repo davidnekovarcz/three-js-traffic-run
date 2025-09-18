@@ -5,13 +5,13 @@ import {
   ExtrudeGeometry,
   Shape,
   CanvasTexture,
-  Vector2
+  Vector2,
 } from 'three';
 
 // Track and map constants
-const lawnGreen = "#67C240";
-const trackColor = "#546E90";
-const edgeColor = "#725F48";
+const lawnGreen = '#67C240';
+const trackColor = '#546E90';
+const edgeColor = '#725F48';
 const trackRadius = 225;
 const trackWidth = 45;
 const innerTrackRadius = trackRadius - trackWidth;
@@ -27,14 +27,14 @@ const arcAngle3 = Math.acos(arcCenterX / innerTrackRadius);
 const arcAngle4 = Math.acos(arcCenterX / outerTrackRadius);
 
 function getLineMarkings(mapWidth, mapHeight) {
-  const canvas = document.createElement("canvas");
+  const canvas = document.createElement('canvas');
   canvas.width = mapWidth;
   canvas.height = mapHeight;
-  const context = canvas.getContext("2d");
+  const context = canvas.getContext('2d');
   context.fillStyle = trackColor;
   context.fillRect(0, 0, mapWidth, mapHeight);
   context.lineWidth = 2;
-  context.strokeStyle = "#E0FFFF";
+  context.strokeStyle = '#E0FFFF';
   context.setLineDash([10, 14]);
   // Left circle
   context.beginPath();
@@ -84,15 +84,15 @@ function getLineMarkings(mapWidth, mapHeight) {
 }
 
 function getCurbsTexture(mapWidth, mapHeight) {
-  const canvas = document.createElement("canvas");
+  const canvas = document.createElement('canvas');
   canvas.width = mapWidth;
   canvas.height = mapHeight;
-  const context = canvas.getContext("2d");
+  const context = canvas.getContext('2d');
   context.fillStyle = lawnGreen;
   context.fillRect(0, 0, mapWidth, mapHeight);
   // Extra big
   context.lineWidth = 65;
-  context.strokeStyle = "#A2FF75";
+  context.strokeStyle = '#A2FF75';
   context.beginPath();
   context.arc(
     mapWidth / 2 - arcCenterX,
@@ -288,7 +288,14 @@ function getOuterField(mapWidth, mapHeight) {
   return field;
 }
 
-function renderMap(scene, mapWidth, mapHeight, config, positionScoreElement, Tree) {
+function renderMap(
+  scene,
+  mapWidth,
+  mapHeight,
+  config,
+  positionScoreElement,
+  Tree
+) {
   const lineMarkingsTexture = getLineMarkings(mapWidth, mapHeight);
   const planeGeometry = new PlaneGeometry(mapWidth, mapHeight);
   const planeMaterial = new MeshLambertMaterial({ map: lineMarkingsTexture });
@@ -309,8 +316,11 @@ function renderMap(scene, mapWidth, mapHeight, config, positionScoreElement, Tre
     { depth: 6, bevelEnabled: false }
   );
   const fieldMesh = new Mesh(fieldGeometry, [
-    new MeshLambertMaterial({ color: !config.curbs && lawnGreen, map: config.curbs && curbsTexture }),
-    new MeshLambertMaterial({ color: 0x23311c })
+    new MeshLambertMaterial({
+      color: !config.curbs && lawnGreen,
+      map: config.curbs && curbsTexture,
+    }),
+    new MeshLambertMaterial({ color: 0x23311c }),
   ]);
   fieldMesh.receiveShadow = true;
   fieldMesh.matrixAutoUpdate = false;
@@ -319,10 +329,20 @@ function renderMap(scene, mapWidth, mapHeight, config, positionScoreElement, Tre
   if (config.trees && typeof Tree === 'function') {
     const arcX = arcCenterX;
     const treePositions = [
-      [arcX * 1.3, 0], [arcX * 1.3, arcX * 1.9], [arcX * 0.8, arcX * 2], [arcX * 1.8, arcX * 2],
-      [-arcX * 1, arcX * 2], [-arcX * 2, arcX * 1.8], [arcX * 0.8, -arcX * 2], [arcX * 1.8, -arcX * 2],
-      [-arcX * 1, -arcX * 2], [-arcX * 2, -arcX * 1.8], [arcX * 0.6, -arcX * 2.3], [arcX * 1.5, -arcX * 2.4],
-      [-arcX * 0.7, -arcX * 2.4], [-arcX * 1.5, -arcX * 1.8]
+      [arcX * 1.3, 0],
+      [arcX * 1.3, arcX * 1.9],
+      [arcX * 0.8, arcX * 2],
+      [arcX * 1.8, arcX * 2],
+      [-arcX * 1, arcX * 2],
+      [-arcX * 2, arcX * 1.8],
+      [arcX * 0.8, -arcX * 2],
+      [arcX * 1.8, -arcX * 2],
+      [-arcX * 1, -arcX * 2],
+      [-arcX * 2, -arcX * 1.8],
+      [arcX * 0.6, -arcX * 2.3],
+      [arcX * 1.5, -arcX * 2.4],
+      [-arcX * 0.7, -arcX * 2.4],
+      [-arcX * 1.5, -arcX * 1.8],
     ];
     for (const [x, y] of treePositions) {
       const tree = Tree();
@@ -345,5 +365,5 @@ export {
   trackWidth,
   innerTrackRadius,
   outerTrackRadius,
-  arcCenterX
-}; 
+  arcCenterX,
+};

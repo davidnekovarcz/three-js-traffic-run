@@ -1,10 +1,10 @@
-@import url("https://fonts.googleapis.com/css?family=Press+Start+2P");
+@import url('https://fonts.googleapis.com/css?family=Press+Start+2P');
 
 body {
   margin: 0;
   padding: 0;
   color: white;
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 button {
@@ -21,7 +21,7 @@ a:visited {
 
 #score {
   position: absolute;
-  font-family: "Press Start 2P", cursive;
+  font-family: 'Press Start 2P', cursive;
   font-size: 0.9em;
   color: white;
   transform: translate(-50%, -50%);
