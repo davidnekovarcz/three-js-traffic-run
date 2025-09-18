@@ -4,101 +4,45 @@ A thrilling 2.5D racing/dodging game built with Three.js where you navigate a fi
 
 ## 🎮 How to Play
 
-### Objective
-- **Complete as many laps as possible** on the figure-8 track
-- **Avoid collisions** with AI vehicles to stay alive
-- **Score points** by completing laps - each lap increases your score
-- **Survive as long as possible** while traffic gets more intense
+- **Objective**: Complete as many laps as possible while avoiding AI vehicles
+- **Controls**: Arrow keys (↑↓←→) for movement, SPACE to pause, R to reset
+- **Lanes**: Switch between inner and outer lanes to avoid traffic
+- **Scoring**: Each completed lap increases your score
 
-### Controls
-- **Arrow Keys** for movement:
-  - `↑` (Up Arrow) - Accelerate / Start Game
-  - `↓` (Down Arrow) - Decelerate
-  - `←` (Left Arrow) - Switch to outer lane
-  - `→` (Right Arrow) - Switch to inner lane
-- **SPACE** - Pause/Resume game
-- **R** - Reset Game (when game over)
+## 🚀 Getting Started
 
-### Game Mechanics
-
-#### 🏁 Lap System
-- **Complete laps** by driving around the figure-8 track
-- **Score increases** with each completed lap
-- **AI vehicles spawn more frequently** as your score increases
-- **Track has two lanes** - inner and outer - switch between them to avoid traffic
-
-#### 🚗 Vehicle System
-- **AI vehicles** spawn randomly on both lanes
-- **Different vehicle types** - cars and trucks with various colors
-- **Collision detection** - hitting any vehicle ends the game
-- **Explosion effects** when vehicles crash
-- **Increasing difficulty** - more vehicles spawn as you progress
-
-#### 🎯 Scoring
-- Your score equals the number of laps completed
-- Higher scores mean more challenging gameplay
-- Try to beat your personal best!
-
-## 🎮 Live Demo
-
-- **Dev Server**: <http://localhost:5173/>
-- **Test Pages**: <http://localhost:5173/test/final-test.html>
-- **Debug Tools**: <http://localhost:5173/test/browser-test.html>
-
-## 🛠️ Technical Details
-
-This is a modern 2.5D racing game built with:
-- **Three.js** for 2.5D graphics and rendering
-- **Vite** for fast development and building
-- **Modular architecture** with clean separation of concerns
-- **Event-driven system** for component communication
-- **Responsive design** that works on all screen sizes
-- **Audio system** with positional sound effects
-- **Performance optimized** for smooth 60fps gameplay
-
-## 💡 Pro Tips
-
-- **Use both lanes strategically** - switch lanes to avoid traffic
-- **Accelerate on straight sections** - decelerate on curves for better control
-- **Watch for patterns** - AI vehicles spawn predictably based on your score
-- **Practice lane switching** - smooth transitions help avoid collisions
-- **Use pause strategically** - take breaks during intense traffic sections
+1. Install dependencies: `npm install`
+2. Start development: `npm run dev`
+3. Open browser and play!
 
 ## 📁 Project Structure
 
 ```bash
-traffic-run-three-js/
-├── index.html          # Main HTML with UI elements
+TrafficRun/
 ├── src/
-│   ├── main.js         # Application entry point
-│   ├── core/           # Core game systems (Refactored Architecture)
-│   │   ├── Game.js     # Main game class with events/config/logging
-│   │   ├── Renderer.js # Three.js rendering engine
-│   │   ├── EventBus.js # Event system for component communication
-│   │   ├── Config.js   # Configuration management system
-│   │   └── Logger.js   # Enhanced logging & error handling
-│   ├── entities/       # Game entity classes (Available for integration)
-│   │   └── Vehicle.js  # OOP vehicle classes (Base, Player, NPC)
-│   ├── assets/         # Game assets
-│   │   └── audio/      # Sound files (car-crash.wav, car-start-iddle.wav)
-│   ├── vehicles.js     # Car/Truck models (legacy - currently active)
-│   ├── track.js        # Track generation
-│   ├── collision.js    # Collision detection
-│   ├── audio.js        # Sound management
-│   ├── ui.js           # UI controls
-│   └── style.css       # Styling
-├── test/               # Testing and debugging tools
-└── !old/              # Original implementation backup
+│   ├── main.ts          # Application entry point
+│   ├── audio.ts         # Sound management
+│   ├── collision.ts     # Collision detection
+│   ├── scene.ts         # Three.js scene setup
+│   ├── track.ts         # Track generation
+│   ├── types.ts         # TypeScript definitions
+│   ├── ui.ts            # UI controls
+│   └── vehicles.ts      # Vehicle models
+├── public/audio/        # Audio files
+├── index.html           # Main HTML
+└── package.json         # Dependencies
 ```
 
-## 📝 Development Notes
+## 🌐 Live Demo
 
-- Game uses procedural generation for vehicles and track textures
-- Audio system integrated with Three.js positional audio
-- Performance optimized for smooth 60fps gameplay
-- Modular architecture enables easier testing and maintenance
-- All new systems are integrated and working
-- Development server runs successfully with live reload
+- **Heroku**: [Play Traffic Run](https://traffic-run-50a7914ff3f5.herokuapp.com/)
+- **GitHub**: [View Source](https://github.com/davidnekovarcz/three-js-traffic-run)
+
+## 💡 Pro Tips
+
+- Use both lanes strategically - switch lanes to avoid traffic
+- Accelerate on straight sections - decelerate on curves for better control
+- Watch for patterns - AI vehicles spawn predictably based on your score
 
 ## 🤝 Contributing
 1. Fork the repository
