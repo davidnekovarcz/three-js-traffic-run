@@ -6,12 +6,22 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "start": "node server.js",
+    "preview": "vite preview",
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run",
+    "test:e2e": "cypress run",
+    "test:e2e:dev": "cypress open"
   },
   "devDependencies": {
     "vite": "^7.0.4"
   },
   "dependencies": {
+    "express": "^4.18.2",
     "three": "^0.178.0"
+  },
+  "engines": {
+    "node": "22.17.0",
+    "npm": "10.x"
   }
 }

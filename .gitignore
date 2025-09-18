@@ -24,4 +24,4 @@ dist-ssr
 *.sw?
 
 # AI
-.claude/temp
+.claude
