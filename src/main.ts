@@ -147,6 +147,9 @@ function reset(): void {
   ready = true;
   gameOver = false;
   gameOverPending = false;
+  // Keep buttons and instructions visible
+  setButtonsOpacity(1);
+  setInstructionsOpacity(1);
   // Resume background music after reset
   resumeBackgroundMusic();
 }
@@ -156,7 +159,7 @@ function startGame() {
     ready = false;
     setScore(0);
     setButtonsOpacity(1);
-    setInstructionsOpacity(0);
+    setInstructionsOpacity(0.7); // Keep instructions visible but dimmed
     setAnimationLoop(animation);
     gameOver = false;
     gameOverPending = false;
