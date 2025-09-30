@@ -70,12 +70,24 @@ a:visited {
   background-color: rgba(20, 20, 20, 0.75);
   display: none;
   z-index: 51;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+#results:hover {
+  background-color: rgba(30, 30, 30, 0.85);
 }
 
 #results .content {
   max-width: 500px;
   padding: 50px;
   border-radius: 20px;
+  text-align: center;
+  transition: transform 0.2s ease;
+}
+
+#results:hover .content {
+  transform: scale(1.02);
 }
 
 @media (min-height: 425px) {
