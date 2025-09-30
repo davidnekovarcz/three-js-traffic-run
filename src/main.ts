@@ -57,6 +57,17 @@ const playerAngleInitial: number = Math.PI;
 let paused: boolean = false;
 let gameOver: boolean = false;
 let gameOverPending: boolean = false;
+let playCount: number = 0;
+let totalLaps: number = 0;
+let totalAccelerations: number = 0;
+let totalDecelerations: number = 0;
+
+// GA tracking helper
+function trackEvent(eventName: string, parameters: Record<string, unknown> = {}) {
+  if (typeof window !== 'undefined' && window.trackEvent) {
+    window.trackEvent(eventName, parameters);
+  }
+}
 
 // Timeout management
 let activeTimeouts: number[] = [];
@@ -100,6 +111,20 @@ function resumeGame(): void {
 }
 
 function reset(): void {
+  // Track restart
+  playCount++;
+  trackEvent('game_restart', {
+    game_id: 'traffic_run',
+    game_name: 'Traffic Run',
+    play_count: playCount,
+    restart_method: 'keyboard',
+    final_score: score,
+    total_laps: totalLaps,
+    total_accelerations: totalAccelerations,
+    total_decelerations: totalDecelerations,
+    event_category: 'game_interaction'
+  });
+  
   // Clear all active timeouts to prevent state inconsistencies
   clearAllTimeouts();
   
@@ -147,6 +172,14 @@ function reset(): void {
   ready = true;
   gameOver = false;
   gameOverPending = false;
+  
+  // Track game start
+  trackEvent('game_start', {
+    game_id: 'traffic_run',
+    game_name: 'Traffic Run',
+    event_category: 'game_interaction'
+  });
+  
   // Keep buttons and instructions visible
   setButtonsOpacity(1);
   setInstructionsOpacity(1);
@@ -217,7 +250,17 @@ function animation(timestamp: number): void {
   const laps = Math.floor(Math.abs(playerAngleMoved) / (Math.PI * 2));
   if (laps !== score) {
     score = laps;
+    totalLaps = Math.max(totalLaps, score);
     setScore(score);
+    
+    // Track lap milestone
+    trackEvent('lap_completed', {
+      game_id: 'traffic_run',
+      game_name: 'Traffic Run',
+      lap_number: score,
+      total_laps: totalLaps,
+      event_category: 'game_interaction'
+    });
   }
   // Change: spawn a new car after every 3 laps (not 5)
   if (otherVehicles.length < (laps + 1) / 3)
@@ -260,10 +303,32 @@ function positionScoreElement() {
 // UI event wiring
 setupUIHandlers({
   onAccelerateDown: val => {
-    if (!paused && !gameOver && !gameOverPending) accelerate = val;
+    if (!paused && !gameOver && !gameOverPending) {
+      accelerate = val;
+      if (val) {
+        totalAccelerations++;
+        trackEvent('accelerate_press', {
+          game_id: 'traffic_run',
+          game_name: 'Traffic Run',
+          total_accelerations: totalAccelerations,
+          event_category: 'game_interaction'
+        });
+      }
+    }
   },
   onDecelerateDown: val => {
-    if (!paused && !gameOver && !gameOverPending) decelerate = val;
+    if (!paused && !gameOver && !gameOverPending) {
+      decelerate = val;
+      if (val) {
+        totalDecelerations++;
+        trackEvent('decelerate_press', {
+          game_id: 'traffic_run',
+          game_name: 'Traffic Run',
+          total_decelerations: totalDecelerations,
+          event_category: 'game_interaction'
+        });
+      }
+    }
   },
   onResetKey: reset,
   onStartKey: () => {
