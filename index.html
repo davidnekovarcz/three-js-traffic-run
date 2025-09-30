@@ -14,6 +14,22 @@
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
       gtag('config', 'G-C4NNL9P9S8');
+      
+      // Test GA on page load
+      gtag('event', 'page_view', {
+        page_title: document.title,
+        page_location: window.location.href
+      });
+      
+      // Global GA event tracking function
+      window.trackEvent = function(eventName, parameters = {}) {
+        if (typeof gtag !== 'undefined') {
+          gtag('event', eventName, parameters);
+          console.log('GA Event tracked:', eventName, parameters);
+        } else {
+          console.warn('gtag not available for event:', eventName);
+        }
+      };
     </script>
   </head>
   <body>
