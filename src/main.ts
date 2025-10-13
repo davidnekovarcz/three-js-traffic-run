@@ -289,6 +289,20 @@ function animation(timestamp: number): void {
   });
   if (hit) {
     gameOverPending = true;
+    
+    // Send game over message to parent iframe
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({
+        type: 'GAME_OVER',
+        gameName: 'Traffic Run',
+        score: totalLaps, // Use total laps as the score for leaderboard
+        level: undefined,
+        finalScore: score,
+        totalAccelerations: totalAccelerations,
+        totalDecelerations: totalDecelerations
+      }, '*');
+    }
+    
     return;
   }
   renderer.render(scene, camera);
