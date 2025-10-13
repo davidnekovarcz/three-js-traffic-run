@@ -39,6 +39,7 @@ import { checkCollision } from './collision';
 import { vehicleColors } from './vehicles';
 import { GameState, VehicleType } from './types';
 import { trackGamePlayed } from './analytics';
+import { initializeFirebaseAuth } from './firebase';
 
 // Game state
 let playerCar: THREE.Group | null = null;
@@ -379,9 +380,12 @@ window.addEventListener('visibilitychange', () => {
 });
 
 // Game initialization
-function init() {
+async function init() {
+  // Initialize Firebase auth (creates anonymous user if needed)
+  await initializeFirebaseAuth();
+  
   // Track game played on load
-  trackGamePlayed();
+  await trackGamePlayed();
   
   // Pick a random color for the player
   playerCarColor = pickRandom(vehicleColors);

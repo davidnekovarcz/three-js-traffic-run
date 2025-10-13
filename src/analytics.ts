@@ -1,19 +1,18 @@
 /**
  * Game Analytics Utilities for Traffic Run
  * 
- * Tracks game play events and maintains play counts in localStorage
+ * Tracks game play events and maintains play counts in localStorage + Firebase
  */
+
+import { 
+  initializeFirebaseAuth, 
+  syncGameStatsWithFirebase, 
+  trackFirebaseEvent,
+  GameStats 
+} from './firebase';
 
 const STORAGE_KEY = 'playful_game_stats';
 const GAME_NAME = 'Traffic Run';
-
-export interface GameStats {
-  [gameName: string]: {
-    playCount: number;
-    lastPlayed: string;
-    firstPlayed: string;
-  };
-}
 
 /**
  * Get all game statistics from localStorage
@@ -46,8 +45,9 @@ function saveGameStats(stats: GameStats): void {
 /**
  * Track when a game is played
  * Increments play count and updates timestamps
+ * Syncs with Firebase automatically
  */
-export function trackGamePlayed(): void {
+export async function trackGamePlayed(): Promise<void> {
   const stats = getGameStats();
   const now = new Date().toISOString();
   
@@ -81,6 +81,27 @@ export function trackGamePlayed(): void {
       first_played: stats[GAME_NAME].firstPlayed,
       last_played: stats[GAME_NAME].lastPlayed
     });
+  }
+
+  // Track with Firebase Analytics
+  trackFirebaseEvent('play_game', {
+    game_name: GAME_NAME,
+    timestamp: now,
+    play_count: stats[GAME_NAME].playCount
+  });
+
+  trackFirebaseEvent('game_played_total', {
+    game_name: GAME_NAME,
+    play_count: stats[GAME_NAME].playCount,
+    first_played: stats[GAME_NAME].firstPlayed,
+    last_played: stats[GAME_NAME].lastPlayed
+  });
+
+  // Sync with Firebase (async, don't wait)
+  try {
+    await syncGameStatsWithFirebase();
+  } catch (error) {
+    console.error('Error syncing with Firebase:', error);
   }
 }
 
