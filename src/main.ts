@@ -38,6 +38,7 @@ import { initAudio, playBackgroundMusic, stopBackgroundMusic, pauseBackgroundMus
 import { checkCollision } from './collision';
 import { vehicleColors } from './vehicles';
 import { GameState, VehicleType } from './types';
+import { trackGamePlayed } from './analytics';
 
 // Game state
 let playerCar: THREE.Group | null = null;
@@ -379,6 +380,9 @@ window.addEventListener('visibilitychange', () => {
 
 // Game initialization
 function init() {
+  // Track game played on load
+  trackGamePlayed();
+  
   // Pick a random color for the player
   playerCarColor = pickRandom(vehicleColors);
   playerCar = Car([playerCarColor]);
