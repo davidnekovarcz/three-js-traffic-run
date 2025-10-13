@@ -38,7 +38,7 @@ import { initAudio, playBackgroundMusic, stopBackgroundMusic, pauseBackgroundMus
 import { checkCollision } from './collision';
 import { vehicleColors } from './vehicles';
 import { GameState, VehicleType } from './types';
-import { trackGamePlayed } from './analytics';
+import { trackGamePlayed, trackMaxLevel } from './analytics';
 import { initializeFirebaseAuth } from './firebase';
 
 // Game state
@@ -254,6 +254,9 @@ function animation(timestamp: number): void {
     score = laps;
     totalLaps = Math.max(totalLaps, score);
     setScore(score);
+    
+    // Track max level achievement
+    trackMaxLevel(score);
     
     // Track lap milestone
     trackEvent('lap_completed', {
