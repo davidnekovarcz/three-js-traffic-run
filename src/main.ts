@@ -404,8 +404,8 @@ async function init() {
   // Track game played on load
   await trackGamePlayed();
   
-  // Pick a random color for the player
-  playerCarColor = pickRandom(vehicleColors);
+  // Always use pink for the player car
+  playerCarColor = 0xef2d56; // Pink color
   playerCar = Car([playerCarColor]);
   scene.add(playerCar);
   renderMap(
