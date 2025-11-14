@@ -1,5 +1,5 @@
 import { initializeApp, getApp, getApps } from "firebase/app";
-import { getAuth, signInAnonymously, onAuthStateChanged, User } from "firebase/auth";
+import { getAuth, signInAnonymously, onAuthStateChanged, User, GoogleAuthProvider } from "firebase/auth";
 import { getFirestore, doc, setDoc, getDoc, serverTimestamp, DocumentData } from "firebase/firestore";
 import { getAnalytics, logEvent } from "firebase/analytics";
 
@@ -18,12 +18,16 @@ const firebaseConfig = {
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const auth = getAuth(app);
 const db = getFirestore(app);
+const googleProvider = new GoogleAuthProvider();
 let analytics: any; // Use any for analytics to avoid strict type issues with getAnalytics
 if (typeof window !== 'undefined') {
   analytics = getAnalytics(app);
 }
 
 let currentUser: User | null = null;
+
+// Export auth and googleProvider for use in other modules
+export { auth, googleProvider };
 
 // Define interfaces for game stats
 export interface GameStats {

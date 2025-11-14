@@ -59,8 +59,24 @@
     </div>
     <div id="results">
       <div class="content">
-        <h1>You hit another vehicle</h1>
-        <p>To reset the game press R or tap anywhere</p>
+        <div id="score-frame">
+          <h1>Game Over</h1>
+          <div id="game-result-info">
+            <div id="player-info">Player: <span id="player-name-display">—</span></div>
+            <div id="score-info">Score: <span id="final-score">0</span></div>
+          </div>
+          <div id="player-retry">
+            <button id="retry-button">Retry</button>
+          </div>
+          <div id="sign-in-container">
+            <p id="sign-in-prompt">Want to save your score? Sign in with Google!</p>
+            <button id="sign-in-button">🎮 Sign In with Google</button>
+            <div id="user-info-display" style="display: none; text-align: center;">
+              <p id="signed-in-message">Signed in as</p>
+              <p id="signed-in-name" style="font-weight: bold; font-size: 1.2em;"></p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
     <div id="pause-dialog" style="display:none; position: absolute; align-items: center; justify-content: center; height: 100%; width: 100%; background-color: rgba(20, 20, 20, 0.75); z-index: 52;">

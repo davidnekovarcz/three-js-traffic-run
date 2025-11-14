@@ -33,6 +33,14 @@ import {
   setupUIHandlers,
   showPauseDialog,
   hidePauseDialog,
+  showPlayerGreeting,
+  hidePlayerUI,
+  showGameResult,
+  hideGameResult,
+  showSignInContainer,
+  hideSignInContainer,
+  hideUserInfo,
+  retryButtonElement,
 } from './ui';
 import { initAudio, playBackgroundMusic, stopBackgroundMusic, pauseBackgroundMusic, resumeBackgroundMusic } from './audio';
 import { checkCollision } from './collision';
@@ -40,6 +48,8 @@ import { vehicleColors } from './vehicles';
 import { GameState, VehicleType } from './types';
 import { trackGamePlayed, trackMaxLevel } from './analytics';
 import { initializeFirebaseAuth } from './firebase';
+import { signInWithGoogle, isUserLoggedIn, getCurrentUserName } from './auth';
+import { saveLeaderboardScore } from './leaderboard';
 
 // Game state
 let playerCar: THREE.Group | null = null;
@@ -69,6 +79,39 @@ function trackEvent(eventName: string, parameters: Record<string, unknown> = {})
   if (typeof window !== 'undefined' && window.trackEvent) {
     window.trackEvent(eventName, parameters);
   }
+}
+
+// Player name storage helpers
+interface PlayerData {
+  id: string;
+  name: string;
+}
+
+function hasPlayerName(): boolean {
+  return localStorage.getItem('playerName') !== null;
+}
+
+function getPlayerData(): PlayerData | null {
+  const name = localStorage.getItem('playerName');
+  if (!name) return null;
+  
+  let id = localStorage.getItem('playerId');
+  if (!id) {
+    id = 'player_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
+    localStorage.setItem('playerId', id);
+  }
+  
+  return { id, name };
+}
+
+function setPlayerName(name: string): PlayerData {
+  localStorage.setItem('playerName', name);
+  let id = localStorage.getItem('playerId');
+  if (!id) {
+    id = 'player_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
+    localStorage.setItem('playerId', id);
+  }
+  return { id, name };
 }
 
 // Timeout management
@@ -112,6 +155,44 @@ function resumeGame(): void {
   }
 }
 
+function handleGameOver(): void {
+  gameOver = true;
+
+  // Check if player has a name stored
+  if (hasPlayerName()) {
+    // Player has a name stored, show greeting and save score
+    const playerData = getPlayerData();
+    if (playerData) {
+      saveLeaderboardScore({
+        name: playerData.name,
+        score: score,
+      }).catch(error => {
+        console.error('Failed to save leaderboard score:', error);
+      });
+      showPlayerGreeting(playerData.name, score);
+    }
+  } else if (isUserLoggedIn()) {
+    // User is logged in with Google, auto-save their Google name
+    const googleName = getCurrentUserName();
+    if (googleName) {
+      const playerData = setPlayerName(googleName);
+      saveLeaderboardScore({
+        name: playerData.name,
+        score: score,
+      }).catch(error => {
+        console.error('Failed to save leaderboard score:', error);
+      });
+      showPlayerGreeting(googleName, score);
+    }
+  } else {
+    // No name and not logged in - show sign-in prompt, show score but hide retry button
+    showGameResult('—', score);
+    // Hide retry button only (don't hide the game result with score)
+    if (retryButtonElement) retryButtonElement.style.display = 'none';
+    showSignInContainer();
+  }
+}
+
 function reset(): void {
   // Track restart
   playCount++;
@@ -145,6 +226,10 @@ function reset(): void {
   });
   otherVehicles = [];
   showResults(false);
+  hidePlayerUI();
+  hideSignInContainer();
+  hideUserInfo();
+  hideGameResult();
   lastTimestamp = undefined;
   // Place the player's car to the starting position
   movePlayerCar(0);
@@ -289,6 +374,7 @@ function animation(timestamp: number): void {
   });
   if (hit) {
     gameOverPending = true;
+    handleGameOver();
     
     // Send game over message to parent iframe
     if (window.parent && window.parent !== window) {
@@ -352,7 +438,8 @@ setupUIHandlers({
   onResetKey: reset,
   onStartKey: () => {
     if (gameOver || gameOverPending) {
-      reset();
+      // Don't reset on key press during game over
+      return;
     } else if (paused) {
       resumeGame();
     } else {
@@ -364,6 +451,35 @@ setupUIHandlers({
   },
   onRightKey: () => {
     if (!paused && !gameOver && !gameOverPending) playerLane = 'inner';
+  },
+  onRetryClick: reset,
+  onSignIn: async () => {
+    try {
+      const googleName = await signInWithGoogle();
+      if (googleName) {
+        // Auto-save the Google name
+        const playerData = setPlayerName(googleName);
+        
+        // Update game result to show user's name
+        showGameResult(googleName, score);
+        
+        // Hide the sign-in container since user is now signed in
+        hideSignInContainer();
+        
+        // Show retry button now that user is signed in
+        if (retryButtonElement) retryButtonElement.style.display = 'block';
+
+        // Save score with the new name
+        saveLeaderboardScore({
+          name: playerData.name,
+          score: score,
+        }).catch(error => {
+          console.error('Failed to save leaderboard score:', error);
+        });
+      }
+    } catch (error) {
+      console.error('Sign-in failed:', error);
+    }
   },
 });
 
@@ -425,8 +541,7 @@ window.addEventListener('keydown', event => {
   if (event.key === ' ') {
     event.preventDefault();
     if (gameOver) {
-      // During game over, space key should restart the game
-      reset();
+      // Don't reset during game over
       return;
     }
     if (paused) {

@@ -90,6 +90,109 @@ a:visited {
   transform: scale(1.02);
 }
 
+#player-retry {
+  text-align: center;
+}
+
+#retry-button {
+  display: none;
+  margin: 30px auto 0;
+  padding: 12px 32px;
+  font-size: 16px;
+  background-color: white;
+  color: black;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+
+#retry-button:hover {
+  transform: scale(1.05);
+}
+
+#retry-button:active {
+  transform: scale(0.95);
+  box-shadow: 1px 2px 0px 0px rgba(0, 0, 0, 0.75);
+}
+
+#game-result-info {
+  margin: 30px 0;
+  padding: 20px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+#player-info,
+#score-info {
+  font-size: 1.1em;
+  margin: 10px 0;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+#player-name-display {
+  font-weight: bold;
+  color: white;
+}
+
+#score-frame {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05));
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 15px;
+  padding: 40px 50px;
+  margin: 0 auto;
+  max-width: 450px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  text-align: center;
+}
+
+#score-frame h1 {
+  margin: 0 0 30px 0;
+  font-size: 2em;
+}
+
+#sign-in-container {
+  display: none;
+  margin-top: 30px;
+  padding-top: 25px;
+  text-align: center;
+}
+
+#sign-in-prompt {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0 0 15px 0;
+  font-style: italic;
+}
+
+#sign-in-button {
+  display: block;
+  width: 100%;
+  padding: 12px 32px;
+  font-size: 16px;
+  background: linear-gradient(135deg, #4285F4, #34A853);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.2s ease;
+  box-shadow: 3px 5px 0px 0px rgba(0, 0, 0, 0.75);
+  box-sizing: border-box;
+}
+
+#sign-in-button:hover {
+  transform: scale(1.05);
+  background: linear-gradient(135deg, #357ae8, #2d9047);
+}
+
+#sign-in-button:active {
+  transform: scale(0.95);
+  box-shadow: 1px 2px 0px 0px rgba(0, 0, 0, 0.75);
+}
+
 @media (min-height: 425px) {
   #score {
     font-size: 1.5em;
