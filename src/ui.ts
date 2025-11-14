@@ -4,6 +4,16 @@ const buttonsElement = document.getElementById('buttons');
 const instructionsElement = document.getElementById('instructions');
 const resultsElement = document.getElementById('results');
 const pauseDialogElement = document.getElementById('pause-dialog');
+const resetInstructionElement = document.getElementById('reset-instruction');
+const finalScoreElement = document.getElementById('final-score');
+const retryButtonElement = document.getElementById('retry-button');
+const gameResultInfoElement = document.getElementById('game-result-info');
+const playerNameDisplayElement = document.getElementById('player-name-display');
+const signInContainerElement = document.getElementById('sign-in-container');
+const signInButtonElement = document.getElementById('sign-in-button');
+const signInPromptElement = document.getElementById('sign-in-prompt');
+const userInfoDisplayElement = document.getElementById('user-info-display');
+const signedInNameElement = document.getElementById('signed-in-name');
 
 // Create arrow buttons
 const upButton = document.createElement('button');
@@ -64,45 +74,67 @@ let onAccelerate = null;
 let onDecelerate = null;
 let onReset = null;
 let onStart = null;
+let onRetry = null;
 
 function setScore(value) {
   if (scoreElement) scoreElement.innerText = value;
 }
+
+function setFinalScore(value: number) {
+  if (finalScoreElement) finalScoreElement.innerText = value.toString();
+}
+
+function showGameResult(playerName: string, score: number) {
+  if (playerNameDisplayElement) playerNameDisplayElement.innerText = playerName;
+  if (finalScoreElement) finalScoreElement.innerText = score.toString();
+  if (gameResultInfoElement) gameResultInfoElement.style.display = 'block';
+}
+
+function hideGameResult() {
+  if (gameResultInfoElement) gameResultInfoElement.style.display = 'none';
+  if (playerNameDisplayElement) playerNameDisplayElement.innerText = '—';
+}
+
+function showPlayerGreeting(name: string, score: number) {
+  showGameResult(name, score);
+  if (retryButtonElement) retryButtonElement.style.display = 'block';
+}
+
+function hidePlayerUI() {
+  if (retryButtonElement) retryButtonElement.style.display = 'none';
+  hideGameResult();
+}
+
+function showSignInContainer() {
+  if (signInContainerElement) signInContainerElement.style.display = 'block';
+}
+
+function hideSignInContainer() {
+  if (signInContainerElement) signInContainerElement.style.display = 'none';
+}
+
+function showUserInfo(userName: string) {
+  // Hide the sign-in button and prompt
+  if (signInButtonElement) signInButtonElement.style.display = 'none';
+  if (signInPromptElement) signInPromptElement.style.display = 'none';
+
+  // Show the user info display
+  if (userInfoDisplayElement) userInfoDisplayElement.style.display = 'block';
+  if (signedInNameElement) signedInNameElement.innerText = userName;
+}
+
+function hideUserInfo() {
+  // Show the sign-in button and prompt
+  if (signInButtonElement) signInButtonElement.style.display = 'block';
+  if (signInPromptElement) signInPromptElement.style.display = 'block';
+
+  // Hide the user info display
+  if (userInfoDisplayElement) userInfoDisplayElement.style.display = 'none';
+}
 function showResults(show) {
   if (resultsElement) {
     resultsElement.style.display = show ? 'flex' : 'none';
-    
-    // Add click/tap event listener for mobile restart when showing results
-    if (show) {
-      const handleRestart = () => {
-        if (onReset) {
-          // Track restart event
-          if (typeof window !== 'undefined' && window.trackEvent) {
-            window.trackEvent('game_restart', {
-              game_id: 'traffic_run',
-              game_name: 'Traffic Run',
-              restart_method: 'tap',
-              event_category: 'game_interaction'
-            });
-          }
-          onReset();
-        }
-      };
-      
-      // Remove any existing listeners to prevent duplicates
-      resultsElement.removeEventListener('click', handleRestart);
-      resultsElement.removeEventListener('touchstart', handleRestart);
-      
-      // Add new listeners
-      resultsElement.addEventListener('click', handleRestart);
-      resultsElement.addEventListener('touchstart', handleRestart);
-      
-      // Make it clear it's clickable
-      resultsElement.style.cursor = 'pointer';
-    } else {
-      // Remove listeners when hiding results
-      resultsElement.style.cursor = 'default';
-    }
+    // Don't add click/tap reset - only Retry button should reset
   }
 }
 function setInstructionsOpacity(opacity) {
@@ -124,11 +156,14 @@ function setupUIHandlers({
   onStartKey,
   onLeftKey,
   onRightKey,
+  onRetryClick,
+  onSignIn,
 }) {
   onAccelerate = onAccelerateDown;
   onDecelerate = onDecelerateDown;
   onReset = onResetKey;
   onStart = onStartKey;
+  onRetry = onRetryClick;
   if (upButton) {
     upButton.addEventListener('mousedown', () => {
       if (onStart) onStart();
@@ -189,20 +224,6 @@ function setupUIHandlers({
     if (event.key === 'ArrowRight') {
       if (onRightKey) onRightKey();
     }
-    if (event.key === 'R' || event.key === 'r') {
-      if (onReset) {
-        // Track restart event
-        if (typeof window !== 'undefined' && window.trackEvent) {
-          window.trackEvent('game_restart', {
-            game_id: 'traffic_run',
-            game_name: 'Traffic Run',
-            restart_method: 'keyboard',
-            event_category: 'game_interaction'
-          });
-        }
-        onReset();
-      }
-    }
   });
   window.addEventListener('keyup', event => {
     if (event.key === 'ArrowUp') {
@@ -212,10 +233,40 @@ function setupUIHandlers({
       if (onDecelerate) onDecelerate(false);
     }
   });
+
+  // Retry button handler
+  if (retryButtonElement) {
+    retryButtonElement.addEventListener('click', () => {
+      if (onRetry) onRetry();
+    });
+    // Add hover effects for retry button
+    retryButtonElement.addEventListener('mouseenter', () => {
+      retryButtonElement.style.transform = 'scale(1.05)';
+    });
+    retryButtonElement.addEventListener('mouseleave', () => {
+      retryButtonElement.style.transform = 'scale(1)';
+    });
+    retryButtonElement.addEventListener('mousedown', () => {
+      retryButtonElement.style.transform = 'scale(0.95)';
+      retryButtonElement.style.boxShadow = '1px 2px 0px 0px rgba(0, 0, 0, 0.75)';
+    });
+    retryButtonElement.addEventListener('mouseup', () => {
+      retryButtonElement.style.transform = 'scale(1.05)';
+      retryButtonElement.style.boxShadow = 'none';
+    });
+  }
+
+  // Sign-in button handler
+  if (signInButtonElement && onSignIn) {
+    signInButtonElement.addEventListener('click', () => {
+      onSignIn();
+    });
+  }
 }
 
 export {
   setScore,
+  setFinalScore,
   showResults,
   setInstructionsOpacity,
   setButtonsOpacity,
@@ -224,6 +275,15 @@ export {
   buttonsElement,
   instructionsElement,
   resultsElement,
+  retryButtonElement,
   showPauseDialog,
   hidePauseDialog,
+  showPlayerGreeting,
+  hidePlayerUI,
+  showGameResult,
+  hideGameResult,
+  showSignInContainer,
+  hideSignInContainer,
+  showUserInfo,
+  hideUserInfo,
 };
