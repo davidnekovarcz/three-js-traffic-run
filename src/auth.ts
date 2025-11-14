@@ -2,15 +2,15 @@ import { signInWithPopup, onAuthStateChanged, GoogleAuthProvider } from 'firebas
 import { getAuth } from 'firebase/auth';
 import { initializeApp, getApp, getApps } from 'firebase/app';
 
-// Firebase config (must match firebase.ts)
+// Firebase config from environment variables
 const firebaseConfig = {
-  apiKey: "AIzaSyBs4ePPl25niBHozW6kv2AGou5iw0aG5hQ",
-  authDomain: "smarlify-api.firebaseapp.com",
-  projectId: "smarlify-api",
-  storageBucket: "smarlify-api.firebasestorage.app",
-  messagingSenderId: "117162085061",
-  appId: "1:117162085061:web:cd64d13eff75941de17eac",
-  measurementId: "G-1JZRLPFQVT"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
 // Initialize Firebase (ensure it's only initialized once)
