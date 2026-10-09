@@ -25,3 +25,10 @@ dist-ssr
 
 # AI
 .claude
+
+# Secrets and Kaloko run output
+.env
+.env.*
+!.env.example
+tmp/kaloko/
+.kaloko/

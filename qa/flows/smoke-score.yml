@@ -1,0 +1,42 @@
+schema: qawalk.scenario.v1
+id: TRAFFIC-SMOKE-SCORE
+title: Smoke — play, lose, save with Google
+kind: flow
+source: qa/flows/ACCEPTANCE-smoke.md
+version: 1
+locales: [en]
+viewports:
+  desktop: [1280, 800]
+environments: [local]
+lanes: [Main path]
+readonly: false
+
+sessions:
+  player:
+    title: Test Gmail
+    account: player
+
+nodes:
+  - id: score
+    session: player
+    kind: screen
+    title: Game over score saved with Google
+    path: /
+    purpose: A short run ends, the test Gmail signs in, and the score is saved.
+    page: work
+    execution:
+      strategy: playwright
+      script: steps/smoke-score.mjs
+      instructions: Accelerate into traffic, sign in with Google, and land on the saved-score result.
+    criteria:
+      - id: AC1
+        text: Game over result is on screen.
+        check: { type: deterministic, assert: exists, selector: "#results" }
+      - id: AC2
+        text: Google sign-in prompt is gone.
+        check: { type: deterministic, assert: absent, selector: "#sign-in-button" }
+      - id: AC3
+        text: Retry is available after the score is saved.
+        check: { type: deterministic, assert: exists, selector: "#retry-button" }
+
+edges: []
