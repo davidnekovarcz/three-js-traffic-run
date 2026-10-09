@@ -1,0 +1,46 @@
+schema: qawalk.config.v1
+# Organization slug on kaloko.app
+org: plexima-io
+project: traffic-run
+project_name: Traffic Run
+
+# Where scenarios live
+scenarios:
+  - qa/flows/*.yml
+
+output: tmp/kaloko
+
+browser:
+  # Use an installed Chrome instead of downloading Playwright's Chromium
+  channel: chrome
+  port: 9334
+
+environments:
+  local:
+    # 5176: 5173 is Marooned and 5174 is another Vite app in this workspace
+    base_url:
+      default: http://localhost:5176
+    # Saved once with `npx kaloko auth save --env local --account player`.
+    # The file is gitignored under tmp/kaloko/.auth. No password in git.
+    accounts:
+      player: {}
+  production:
+    # production is always readonly: no data creation, no admin, no writes
+    base_url: https://traffic-run-50a7914ff3f5.herokuapp.com
+    readonly: true
+
+evaluators:
+  jev:
+    model: jev-1.13.0
+    api_key_env: TYPESAFE_API_KEY
+    thresholds: { pass: 0.85, fail: 0.15 }
+  vision:
+    model: claude-opus-5-5
+    api_key_env: ANTHROPIC_API_KEY
+    when: uncertain
+    max_calls: 40
+
+share:
+  url: https://kaloko.app
+  token_env: KALOKO_TOKEN
+  expires_days: 30
