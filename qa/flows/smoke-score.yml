@@ -7,9 +7,9 @@ version: 1
 locales: [en]
 viewports:
   desktop: [1280, 800]
-environments: [local]
+environments: [local, production]
 lanes: [Main path]
-readonly: false
+readonly: true
 
 sessions:
   player:
