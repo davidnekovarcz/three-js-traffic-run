@@ -1,0 +1,49 @@
+name: Kaloko
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  walk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.17.0
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install the Kaloko browser
+        run: npx kaloko browser install --with-deps
+        env:
+          KALOKO_BROWSER_CHANNEL: chromium
+
+      - name: Walk affected scenarios on Heroku
+        env:
+          KALOKO_TOKEN: ${{ secrets.KALOKO_TOKEN }}
+          KALOKO_BROWSER_CHANNEL: chromium
+        run: |
+          set -eu
+          shopt -s nullglob
+          walked=0
+          for scenario in qa/flows/*.yml; do
+            echo "── $scenario"
+            if ! npx kaloko affected --scenario "$scenario" --fail-if-none; then
+              echo "No affected steps, skipping $scenario"
+              continue
+            fi
+            npx kaloko start --scenario "$scenario" --env production
+            npx kaloko walk --affected --ephemeral
+            npx kaloko share
+            walked=1
+          done
+          if [ "$walked" -eq 0 ]; then
+            echo "This commit does not reach a scenario."
+          fi
